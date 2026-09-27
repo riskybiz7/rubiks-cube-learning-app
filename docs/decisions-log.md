@@ -18,17 +18,19 @@ unless marked otherwise. This log feeds the design spec.
 | 9 | Beginner method variant | **Daisy method** | Yellow center up, white-edge daisy, flip petals down to a white cross on the bottom. Yellow on top for the rest of the solve. |
 | 10 | Audience split | Beginner content → friends & family; CFOP → owner and keen solvers | Beginner side: plain-English and visual. CFOP side: fast lookup and practice. |
 | 11 | Algorithm sourcing | Stage order from the owner's photos; algorithms proposed by Claude, labeled **unconfirmed** until the owner checks them | Video of a solve was considered and rejected: moves can't be read reliably from blurry frames. |
-
 | 12 | Beginner stage map | **10 stages** read from the owner's photos (see `reference/beginner-method/README.md`) | Last layer order: yellow cross → edges → position corners → twist corners. Stages 2 to 4 are done **white up** (owner confirmed). |
 | 13 | Color scheme | **Standard**, confirmed from photos 5.1, 10.1, 10.2 | Closes the earlier open item. |
 | 14 | Reference photos in git | **Resized copies only** (`small/`, 7.6 MB); originals (54.0 MB) stay on disk, gitignored | Owner's choice. |
+| 15 | Stage 2 and 6 procedures | **Owner-confirmed.** Stage 2: match petal, turn face twice, flip after all 4. Stage 6: line ×1; reverse L (photo 5.0 hold) ×2; dot ×1 → re-hold as reverse L → ×2 | Stage 6 moves `F R U R' U' F'` also owner-confirmed (checked on the real cube, 2026-09-27). |
+| 17 | Design spec | **Approved** (2026-09-27): `docs/superpowers/specs/2026-09-27-cube-learning-app-design.md` | Next: phase ① implementation plan. |
+| 16 | Flip instructions | Name the **end position** ("white on top, green facing you"), per cubing-tutorial convention | Claude's default, owner deferred; revisit with the running app. |
 
 ## Design sections approved
 
 - §1 Architecture (modules): approved
 - §2 Data flow for "Solve My Cube": approved
 - §3 Free-form camera scanner: approved
-- §4 Testing, error handling, project setup: **pending**
+- §4 Testing, error handling, project setup: approved
 
 ## Open items
 

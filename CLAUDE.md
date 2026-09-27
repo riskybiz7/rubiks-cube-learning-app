@@ -18,15 +18,12 @@ first, and later by free-form camera scanning.
 
 ## Status
 
-**Design phase, with no code yet.** Brainstorming decisions are recorded in
-`docs/decisions-log.md`. Next steps, in order:
+**Design approved; no code yet.** The approved design spec is
+`docs/superpowers/specs/2026-09-27-cube-learning-app-design.md`, and decisions are
+logged in `docs/decisions-log.md`. Each build phase gets its own implementation plan
+in `docs/superpowers/plans/`, reviewed by the owner before any code is written.
 
-1. Collect the owner's beginner-method stage photos → `reference/beginner-method/`
-2. Finish design §4 (testing, error handling, setup)
-3. Write the design spec → `docs/superpowers/specs/`, then get owner review
-4. Write the implementation plan, then build
-
-Do not scaffold code or install packages until the spec and plan are approved.
+Next: owner reviews the phase ① plan (project setup + cube model + 3D view).
 
 ## Planned stack (approved, not yet installed)
 
