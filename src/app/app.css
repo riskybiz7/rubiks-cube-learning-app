@@ -10,4 +10,73 @@ body {
   max-width: 720px;
   margin: 0 auto;
   padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+.cube-view {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 60vh;
+  background: #ebe7de;
+  border-radius: 12px;
+  overflow: hidden;
+  touch-action: none; /* lets a finger drag rotate the cube instead of scrolling the page */
+}
+.cube-view canvas {
+  display: block;
+}
+.hint {
+  margin: 0;
+  color: #555;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-weight: 600;
+}
+.field input:not([type='range']) {
+  font:
+    1.1rem ui-monospace,
+    monospace;
+  padding: 8px;
+}
+.error {
+  margin: 0;
+  color: #b00020;
+}
+.move-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: ui-monospace, monospace;
+}
+.move-list li {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #fff;
+}
+.move-list li.done {
+  opacity: 0.45;
+}
+.move-list li.next {
+  background: #1d1d1f;
+  color: #fff;
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.controls button {
+  font-size: 1rem;
+  padding: 8px 14px;
 }

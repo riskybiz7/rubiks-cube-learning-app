@@ -23,7 +23,8 @@ first, and later by free-form camera scanning.
 logged in `docs/decisions-log.md`. Each build phase gets its own implementation plan
 in `docs/superpowers/plans/`, reviewed by the owner before any code is written.
 
-Next: owner reviews the phase ① plan (project setup + cube model + 3D view).
+Phase ① (cube model + 3D algorithm player) is built. Next: phase ② plan
+(manual sticker entry + validation).
 
 ## Stack
 
