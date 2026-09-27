@@ -62,7 +62,7 @@ export function LearnScreen() {
         start={demo.start}
         caption={
           demo.moves.length > 0
-            ? `${holdDescription(demo.start)} This stage took ${demo.moves.length} moves on the example cube.`
+            ? `${holdDescription(demo.start)} This stage took ${demo.moves.length} ${demo.moves.length === 1 ? 'move' : 'moves'} on the example cube.`
             : `${holdDescription(demo.start)} This stage is just looking; there's nothing to turn.`
         }
       />
