@@ -205,7 +205,9 @@ function whiteCorners(w: PlanWriter): void {
       );
       continue;
     }
-    const others = bottom.stickers.map((s) => w.cube.stickers[s]).filter((c) => c !== 'W');
+    const others: Color[] = bottom.stickers
+      .map((s) => w.cube.stickers[s])
+      .filter((c) => c !== 'W');
     const k = CUBE_TURNS.findIndex((y) => {
       const turned = applyMoves(w.cube, y);
       return [centerColor(turned, 'R'), centerColor(turned, 'F')].every((c) => others.includes(c));
