@@ -51,4 +51,4 @@ positions are right but couldn't watch the motion itself. Try `R U R' U'`, then
 ## Numbers
 
 - 61 automated tests, all passing (8 geometry, 16 notation, 20 moves, 6 layout, 11 playback).
-- 8 commits on the branch.
+- Commits on the branch: run `git log --oneline main..phase-1-cube-model` to list them.
