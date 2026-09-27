@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { colorList, holdDescription, listJoin, placeName } from './describe';
+import { colorList, faceWord, holdDescription, listJoin, placeName } from './describe';
 import { solved } from './geometry';
 import { applyMoves } from './moves';
 import { mustParse } from './notation';
@@ -10,6 +10,11 @@ describe('describe', () => {
     expect(placeName(['D', 'L', 'F'])).toBe('bottom-front-left');
     expect(placeName(['F', 'R'])).toBe('front-right');
     expect(placeName(['B', 'L'])).toBe('back-left');
+  });
+
+  it('names a single face', () => {
+    expect(faceWord('U')).toBe('top');
+    expect(faceWord('B')).toBe('back');
   });
 
   it('names colors', () => {
