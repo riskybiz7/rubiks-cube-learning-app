@@ -205,9 +205,7 @@ function whiteCorners(w: PlanWriter): void {
       );
       continue;
     }
-    const others: Color[] = bottom.stickers
-      .map((s) => w.cube.stickers[s])
-      .filter((c) => c !== 'W');
+    const others: Color[] = bottom.stickers.map((s) => w.cube.stickers[s]).filter((c) => c !== 'W');
     const k = CUBE_TURNS.findIndex((y) => {
       const turned = applyMoves(w.cube, y);
       return [centerColor(turned, 'R'), centerColor(turned, 'F')].every((c) => others.includes(c));
@@ -251,9 +249,7 @@ function middleLayer(w: PlanWriter): void {
     );
     if (!bottom) {
       // No middle edge is waiting in the bottom layer, so one must be stuck in the middle.
-      const k = CUBE_TURNS.findIndex(
-        (y) => !isSlotSolved(applyMoves(w.cube, y), FRONT_RIGHT_EDGE),
-      );
+      const k = CUBE_TURNS.findIndex((y) => !isSlotSolved(applyMoves(w.cube, y), FRONT_RIGHT_EDGE));
       w.rotate(CUBE_TURNS[k], 'Turn the whole cube so a wrong middle edge is at the front right.');
       w.step(
         'moves',
@@ -321,12 +317,7 @@ function yellowCross(w: PlanWriter): void {
     return;
   }
   if (pattern === 'dot') {
-    w.step(
-      'moves',
-      cross,
-      "Dot: do F R U R' U' F' once. You'll get a reverse L.",
-      'yellow-cross',
-    );
+    w.step('moves', cross, "Dot: do F R U R' U' F' once. You'll get a reverse L.", 'yellow-cross');
     pattern = topPattern(w.cube);
   }
   const times = pattern === 'line' ? 1 : 2;
@@ -359,8 +350,7 @@ function bestTopTurn(cube: Cube): number {
 }
 
 const areOpposite = (slots: readonly (typeof TOP_EDGES)[number][]) =>
-  slots.length === 2 &&
-  Math.abs(TOP_EDGES.indexOf(slots[0]) - TOP_EDGES.indexOf(slots[1])) === 2;
+  slots.length === 2 && Math.abs(TOP_EDGES.indexOf(slots[0]) - TOP_EDGES.indexOf(slots[1])) === 2;
 
 function checkEdges(w: PlanWriter): void {
   w.startStage(7);
