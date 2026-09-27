@@ -23,14 +23,24 @@ first, and later by free-form camera scanning.
 logged in `docs/decisions-log.md`. Each build phase gets its own implementation plan
 in `docs/superpowers/plans/`, reviewed by the owner before any code is written.
 
-Next: owner reviews the phase ① plan (project setup + cube model + 3D view).
+Phase ① (cube model + 3D algorithm player) is built. Next: phase ② plan
+(manual sticker entry + validation).
 
-## Planned stack (approved, not yet installed)
+## Stack
 
-- **TypeScript + React**, built with **Vite**
-- **Three.js** for the 3D cube
-- **OpenCV.js** for camera scanning (phase 4)
-- **Vitest** for tests
+TypeScript + React (built with Vite), Three.js for 3D, Vitest for tests, Prettier
+for formatting. OpenCV.js (camera, phase 4) is not installed yet.
+
+## Commands (run from the project root)
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start the app at http://localhost:5173 |
+| `npm test` | Run all tests once |
+| `npm run test:watch` | Re-run tests on every save |
+| `npm run typecheck` | Check types without building |
+| `npm run build` | Type-check and build for production into `dist/` |
+| `npm run format` | Auto-format code with Prettier |
 
 ## Planned code layout
 
