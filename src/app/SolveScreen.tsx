@@ -1,33 +1,44 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { BEGINNER_STAGES } from '../content/beginner';
 import { holdDescription } from '../cube/describe';
 import { solved } from '../cube/geometry';
 import { applyMoves } from '../cube/moves';
 import { formatAlgorithm, type Move } from '../cube/notation';
-import { randomScramble } from '../cube/scramble';
 import type { Cube } from '../cube/types';
 import { listSteps, solveBeginner } from '../solver/beginner';
 import { CubePlayer } from './CubePlayer';
 import { AlgorithmCard } from './LearnScreen';
 
+/**
+ * Everything about the current solve that must survive switching tabs. It lives in App
+ * (not in this screen), because a screen is removed when another tab is showing.
+ */
+export interface SolveState {
+  useEntered: boolean; // solving the entered cube (true) or a random scramble (false)
+  scramble: readonly Move[];
+  index: number; // which step the user is on
+}
+
 interface SolveScreenProps {
   enteredCube: Cube | null; // a checked cube from "Enter my cube", if there is one
+  state: SolveState;
+  onStateChange: (state: SolveState) => void;
+  onNewScramble: () => void;
   onEnterCube: () => void;
 }
 
-export function SolveScreen({ enteredCube, onEnterCube }: SolveScreenProps) {
-  const [useEntered, setUseEntered] = useState(enteredCube !== null);
-  const [scramble, setScramble] = useState<Move[]>(() => randomScramble());
+export function SolveScreen(props: SolveScreenProps) {
+  const { enteredCube, state, onStateChange, onNewScramble, onEnterCube } = props;
+  const useEntered = state.useEntered && enteredCube !== null;
   const start = useMemo(
-    () => (useEntered && enteredCube ? enteredCube : applyMoves(solved(), scramble)),
-    [useEntered, enteredCube, scramble],
+    () => (useEntered && enteredCube ? enteredCube : applyMoves(solved(), state.scramble)),
+    [useEntered, enteredCube, state.scramble],
   );
   const result = useMemo(() => solveBeginner(start), [start]);
   const steps = useMemo(() => (result.ok ? listSteps(result.plan) : []), [result]);
-  const [index, setIndex] = useState(0);
-  useEffect(() => setIndex(0), [steps]); // a new cube starts again at the first step
-
-  const current = steps[Math.min(index, steps.length - 1)];
+  const index = Math.min(state.index, steps.length - 1);
+  const current = steps[index];
+  const goTo = (next: number) => onStateChange({ ...state, index: next });
 
   return (
     <>
@@ -36,14 +47,17 @@ export function SolveScreen({ enteredCube, onEnterCube }: SolveScreenProps) {
         <button
           className={useEntered ? 'active' : ''}
           disabled={!enteredCube}
-          onClick={() => setUseEntered(true)}
+          onClick={() => onStateChange({ ...state, useEntered: true, index: 0 })}
         >
           My entered cube
         </button>
-        <button className={!useEntered ? 'active' : ''} onClick={() => setUseEntered(false)}>
+        <button
+          className={!useEntered ? 'active' : ''}
+          onClick={() => onStateChange({ ...state, useEntered: false, index: 0 })}
+        >
           A random scramble
         </button>
-        {!useEntered && <button onClick={() => setScramble(randomScramble())}>New scramble</button>}
+        {!useEntered && <button onClick={onNewScramble}>New scramble</button>}
       </div>
       {!enteredCube && (
         <p className="hint">
@@ -56,8 +70,8 @@ export function SolveScreen({ enteredCube, onEnterCube }: SolveScreenProps) {
       )}
       {!useEntered && (
         <p className="hint">
-          Scramble: <code>{formatAlgorithm(scramble)}</code>. Do these moves on a solved cube (white
-          on top, green facing you) to follow along.
+          Scramble: <code>{formatAlgorithm(state.scramble)}</code>. Do these moves on a solved cube
+          (white on top, green facing you) to follow along.
         </p>
       )}
 
@@ -72,7 +86,12 @@ export function SolveScreen({ enteredCube, onEnterCube }: SolveScreenProps) {
           <ol className="stage-list">
             {BEGINNER_STAGES.map((stage, i) => (
               <li key={stage.number} className={i === current.stageIndex ? 'current' : ''}>
-                <button onClick={() => setIndex(steps.findIndex((s) => s.stageIndex === i))}>
+                <button
+                  onClick={() => {
+                    const first = steps.findIndex((s) => s.stageIndex === i);
+                    if (first >= 0) goTo(first);
+                  }}
+                >
                   {stage.number}. {stage.title}
                 </button>
               </li>
@@ -99,10 +118,10 @@ export function SolveScreen({ enteredCube, onEnterCube }: SolveScreenProps) {
           />
 
           <div className="controls">
-            <button disabled={index === 0} onClick={() => setIndex(index - 1)}>
+            <button disabled={index === 0} onClick={() => goTo(index - 1)}>
               ◀ Previous step
             </button>
-            <button disabled={index >= steps.length - 1} onClick={() => setIndex(index + 1)}>
+            <button disabled={index >= steps.length - 1} onClick={() => goTo(index + 1)}>
               Next step ▶
             </button>
           </div>

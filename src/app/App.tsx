@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { solved } from '../cube/geometry';
+import { randomScramble } from '../cube/scramble';
 import type { Cube } from '../cube/types';
 import { blankStickers, type EditorStickers } from '../input/editorState';
 import { EnterCubeScreen } from './EnterCubeScreen';
 import { LearnScreen } from './LearnScreen';
 import { PlayerScreen } from './PlayerScreen';
-import { SolveScreen } from './SolveScreen';
+import { SolveScreen, type SolveState } from './SolveScreen';
 
 type Screen = 'learn' | 'solve' | 'enter' | 'player';
 
@@ -24,6 +25,11 @@ export function App() {
   const [isCustomStart, setIsCustomStart] = useState(false);
   const [editorStickers, setEditorStickers] = useState<EditorStickers>(blankStickers);
   const [enteredCube, setEnteredCube] = useState<Cube | null>(null);
+  const [solve, setSolve] = useState<SolveState>(() => ({
+    useEntered: false,
+    scramble: randomScramble(),
+    index: 0,
+  }));
 
   return (
     <main className="app">
@@ -43,8 +49,12 @@ export function App() {
       {screen === 'learn' && <LearnScreen />}
       {screen === 'solve' && (
         <SolveScreen
-          key={enteredCube ? enteredCube.stickers.join('') : 'none'}
           enteredCube={enteredCube}
+          state={solve}
+          onStateChange={setSolve}
+          onNewScramble={() =>
+            setSolve({ useEntered: false, scramble: randomScramble(), index: 0 })
+          }
           onEnterCube={() => setScreen('enter')}
         />
       )}
@@ -54,6 +64,7 @@ export function App() {
           onStickersChange={setEditorStickers}
           onSolveCube={(cube) => {
             setEnteredCube(cube);
+            setSolve({ ...solve, useEntered: true, index: 0 });
             setScreen('solve');
           }}
           onUseCube={(cube) => {
