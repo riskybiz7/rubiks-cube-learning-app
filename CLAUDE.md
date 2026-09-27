@@ -24,8 +24,8 @@ logged in `docs/decisions-log.md`. Each build phase gets its own implementation 
 in `docs/superpowers/plans/`, reviewed by the owner before any code is written.
 
 Phase ① (cube model + 3D algorithm player) is merged into `main`. Phase ② (manual
-sticker entry + validation, including the pieces view and center-scheme checks) is in
-progress on branch `phase-2-manual-input`. The owner authorized building phase ② without
+sticker entry + validation, including the pieces view and center-scheme checks) is built
+on branch `phase-2-manual-input`. The owner authorized building phase ② without
 check-ins; log questions for the owner in the phase ② review notes.
 
 GitHub: private repo `riskybiz7/rubiks-cube-learning-app` (remote `origin`).
@@ -39,7 +39,7 @@ for formatting. OpenCV.js (camera, phase 4) is not installed yet.
 
 | Command | What it does |
 |---|---|
-| `npm run dev` | Start the app at http://localhost:5173 |
+| `npm run dev` | Start the app at http://localhost:5190 (if that port is busy, Vite picks the next one and prints it) |
 | `npm test` | Run all tests once |
 | `npm run test:watch` | Re-run tests on every save |
 | `npm run typecheck` | Check types without building |
