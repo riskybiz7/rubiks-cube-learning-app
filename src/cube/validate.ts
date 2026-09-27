@@ -127,8 +127,14 @@ function checkColorCounts(cube: Cube): Problem | null {
   ) {
     message += ` One ${COLOR_NAMES[under[0]]} sticker was probably entered as ${COLOR_NAMES[over[0]]}.`;
   }
-  // Suspects: every non-center sticker of a color that appears too often.
-  const suspects = cube.stickers.flatMap((c, i) => (over.includes(c) && i % 9 !== 4 ? [i] : []));
+  // Suspects: every sticker of a color that appears too often. A center only counts
+  // when another center has the same color, because then one of those centers is wrong.
+  const centerCount = (c: Color) => CENTER_STICKERS.filter((i) => cube.stickers[i] === c).length;
+  const suspects = cube.stickers.flatMap((c, i) => {
+    if (!over.includes(c)) return [];
+    const isCenter = i % 9 === 4;
+    return !isCenter || centerCount(c) > 1 ? [i] : [];
+  });
   return { code: 'color-count', message, stickers: suspects };
 }
 

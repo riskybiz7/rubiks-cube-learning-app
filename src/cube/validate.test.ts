@@ -79,6 +79,14 @@ describe('validateStickers: each kind of problem', () => {
     }
   });
 
+  it('points at a center entered in the wrong color, not only the stickers around it', () => {
+    // The right center (13) entered as blue: blue now appears 10 times, and one of the
+    // two blue centers is the real mistake.
+    const result = validateStickers(edited({ 13: 'B' }));
+    expect(codes(result)).toEqual(['color-count']);
+    if (!result.ok) expect(result.problems[0].stickers).toContain(13);
+  });
+
   it('catches two centers of the same color', () => {
     const result = validateStickers(swapped([[22, 0]]));
     expect(codes(result)).toEqual(['duplicate-center']);
@@ -151,6 +159,26 @@ describe('validateStickers: each kind of problem', () => {
 });
 
 describe('validateStickers: robustness', () => {
+  it('handles shuffled stickers around correct centers (exercises the piece checks)', () => {
+    const random = seededRandom(13);
+    const centers = new Set([4, 13, 22, 31, 40, 49]);
+    for (let i = 0; i < 2000; i++) {
+      const stickers = [...solved().stickers];
+      const others = stickers.flatMap((_, s) => (centers.has(s) ? [] : [s]));
+      const shuffled = others.map((s) => stickers[s]).sort(() => random() - 0.5);
+      others.forEach((s, k) => {
+        stickers[s] = shuffled[k];
+      });
+      const result = validateStickers(stickers);
+      if (!result.ok) {
+        expect(result.problems.length).toBeGreaterThan(0);
+        expect(
+          result.problems.every((p) => p.message.length > 0 && !/undefined|NaN/.test(p.message)),
+        ).toBe(true);
+      }
+    }
+  });
+
   it('never crashes on random input, and always explains a rejection', () => {
     const random = seededRandom(11);
     const pick = () => COLORS[Math.floor(random() * 6)];

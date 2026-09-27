@@ -26,7 +26,9 @@ export function PlayerScreen(props: PlayerScreenProps) {
     const container = containerRef.current;
     if (!container) return;
     const view = new CubeView(container);
-    const playback = new Playback(view);
+    // Start from the right cube straight away, even if the algorithm text is invalid
+    // (then the load effect below skips loading, and nothing else would draw `start`).
+    const playback = new Playback(view, start);
     playback.onChange = refresh;
     playbackRef.current = playback;
     return () => {
