@@ -35,10 +35,17 @@ const WIDE_CAPABLE = 'URFDLB';
 
 /**
  * One move: a letter, an optional "w" (wide), then an optional suffix.
- * Suffixes: ' (also the curly ’ and prime ′ that websites use), 2, or 2'.
+ * Suffixes: ' (also the curly ’ and prime ′ that websites and notes apps use), 2, or 2'.
  * The "y" flag makes the pattern match exactly at lastIndex.
  */
-const MOVE_PATTERN = /([URFDLBurfdlbMESxyz])(w?)(2'|2|'|’|′)?/y;
+const MOVE_PATTERN = /([URFDLBurfdlbMESxyz])(w?)(2'|2’|2′|2|'|’|′)?/y;
+
+/**
+ * Characters that carry no meaning between moves: spaces and line breaks,
+ * grouping parentheses, and invisible "format" characters (like the zero-width
+ * space) that web pages sometimes hide in copied text.
+ */
+const IGNORED = /[\s()\p{Cf}]/u;
 
 /** Turn algorithm text into moves, or explain what's wrong and where. */
 export function parseAlgorithm(text: string): ParseResult {
@@ -46,8 +53,7 @@ export function parseAlgorithm(text: string): ParseResult {
   let i = 0;
   while (i < text.length) {
     const ch = text[i];
-    // Spaces, line breaks and grouping parentheses carry no meaning, so skip them.
-    if (/\s/.test(ch) || ch === '(' || ch === ')') {
+    if (IGNORED.test(ch)) {
       i++;
       continue;
     }

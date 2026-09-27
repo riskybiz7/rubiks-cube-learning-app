@@ -43,6 +43,15 @@ describe('parseAlgorithm', () => {
     expect(formatAlgorithm(mustParse("RUR'U'"))).toBe("R U R' U'");
   });
 
+  it('accepts half turns written with curly or prime apostrophes', () => {
+    expect(formatAlgorithm(mustParse('R2’ U2′ Rw2’'))).toBe('R2 U2 r2');
+  });
+
+  it('ignores invisible characters that web pages sometimes hide in text', () => {
+    // U+200B zero-width space and U+FEFF byte-order mark between moves
+    expect(formatAlgorithm(mustParse('R​U﻿ R’'))).toBe("R U R'");
+  });
+
   it('treats empty text as zero moves', () => {
     expect(mustParse('')).toEqual([]);
     expect(mustParse('   \n ')).toEqual([]);
