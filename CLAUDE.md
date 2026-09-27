@@ -70,13 +70,14 @@ Each module has one job and only depends on modules above it in this list:
 
 - **Move notation:** standard Singmaster/WCA notation: `R U R' U'`, `F2`,
   wide moves `r`, slice moves `M E S`, rotations `x y z`.
-- **Beginner method = the daisy method** (owner's preference): yellow center on
-  top, white edges form a "daisy" around it; each petal is matched to its side
-  center and turned twice, giving a white cross **on the bottom**. Every later
-  stage is taught with **yellow on top**. Exact stage order and algorithms
-  follow the owner's photos in `reference/beginner-method/`.
-- **Color scheme:** assumed standard (white opposite yellow, green opposite
-  blue, red opposite orange). Not yet confirmed against the owner's cube.
+- **Beginner method = the daisy method, in 10 stages** (owner's version). The
+  full stage map and proposed algorithms are in `reference/beginner-method/README.md`,
+  which is the source of truth for beginner content. In short: daisy (yellow up) →
+  white cross → white corners → middle layer (stages 2 to 4 are done
+  **white up**, confirmed by owner) → flip to yellow up → yellow cross →
+  check edges → yellow edges → position corners → twist corners.
+- **Color scheme:** standard, confirmed from the owner's photos: white opposite
+  yellow, red opposite orange, blue opposite green.
 
 ## Working with the owner
 

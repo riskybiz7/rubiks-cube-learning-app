@@ -7,6 +7,9 @@ coverage/
 .env
 .env.*
 
+# Full-resolution reference photos stay on disk only; resized copies in small/ are committed
+reference/beginner-method/*.jpeg
+
 # Local Claude Code settings
 .claude/settings.local.json
 

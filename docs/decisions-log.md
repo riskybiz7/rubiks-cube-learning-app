@@ -19,6 +19,10 @@ unless marked otherwise. This log feeds the design spec.
 | 10 | Audience split | Beginner content → friends & family; CFOP → owner and keen solvers | Beginner side: plain-English and visual. CFOP side: fast lookup and practice. |
 | 11 | Algorithm sourcing | Stage order from the owner's photos; algorithms proposed by Claude, labeled **unconfirmed** until the owner checks them | Video of a solve was considered and rejected: moves can't be read reliably from blurry frames. |
 
+| 12 | Beginner stage map | **10 stages** read from the owner's photos (see `reference/beginner-method/README.md`) | Last layer order: yellow cross → edges → position corners → twist corners. Stages 2 to 4 are done **white up** (owner confirmed). |
+| 13 | Color scheme | **Standard**, confirmed from photos 5.1, 10.1, 10.2 | Closes the earlier open item. |
+| 14 | Reference photos in git | **Resized copies only** (`small/`, 7.6 MB); originals (54.0 MB) stay on disk, gitignored | Owner's choice. |
+
 ## Design sections approved
 
 - §1 Architecture (modules): approved
@@ -28,6 +32,5 @@ unless marked otherwise. This log feeds the design spec.
 
 ## Open items
 
-- Owner's beginner-method stage photos → `reference/beginner-method/`
-- Confirm the owner's cube uses the standard color scheme
+- Owner to check the proposed beginner algorithms against their own solving
 - Camera test photos/video → `reference/camera-test/` (needed by phase 4)
