@@ -1,0 +1,13 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #1d1d1f;
+  background: #f6f4ef;
+}
+body {
+  margin: 0;
+}
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+}
