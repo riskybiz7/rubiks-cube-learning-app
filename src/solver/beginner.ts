@@ -111,9 +111,15 @@ class PlanWriter {
     this.cube = applyMoves(this.cube, moves);
   }
 
-  /** Turn the whole cube, describing where it ends up (not how to turn it). */
-  rotate(moves: readonly Move[], why: string): void {
-    if (moves.length === 0) return;
+  /**
+   * Turn the whole cube, describing where it ends up (not how to turn it). When no
+   * turn is needed, still add a "look" step (`already`) so the explanation isn't lost.
+   */
+  rotate(moves: readonly Move[], why: string, already: string): void {
+    if (moves.length === 0) {
+      this.step('check', [], already);
+      return;
+    }
     const hold = holdDescription(applyMoves(this.cube, moves));
     this.step('rotate', moves, `${why} Hold it with ${lowerFirst(hold)}`);
   }
@@ -139,7 +145,11 @@ function petalColors(cube: Cube): Color[] {
 
 function daisy(w: PlanWriter): void {
   w.startStage(1);
-  w.rotate(reorientTo(w.cube, 'Y', 'G'), 'Turn the cube so yellow is on top.');
+  w.rotate(
+    reorientTo(w.cube, 'Y', 'G'),
+    'Turn the cube so yellow is on top.',
+    'Hold the cube with yellow on top and green facing you.',
+  );
   while (petalColors(w.cube).length < 4) {
     const before = petalColors(w.cube);
     const moves = searchMoves(w.cube, (c) => petalColors(c).length > before.length, 5);
@@ -177,7 +187,11 @@ function whiteCross(w: PlanWriter): void {
       `Turn the top until the white-${color} petal sits above the ${color} center, then turn the ${faceWord(choice.face)} face twice to send it down.`,
     );
   }
-  w.rotate(reorientTo(w.cube, 'W', 'G'), 'Turn the cube over so the white cross is on top.');
+  w.rotate(
+    reorientTo(w.cube, 'W', 'G'),
+    'Turn the cube over so the white cross is on top.',
+    'The white cross is already on top, with green facing you.',
+  );
 }
 
 // ── Stage 3: white corners ──────────────────────────────────────────────
@@ -196,7 +210,11 @@ function whiteCorners(w: PlanWriter): void {
     if (!bottom) {
       // Every white corner is on top, but one is in the wrong spot or twisted: drop it down.
       const k = CUBE_TURNS.findIndex((y) => !isSlotSolved(applyMoves(w.cube, y), URF));
-      w.rotate(CUBE_TURNS[k], 'Turn the whole cube so a wrong top corner is at the front right.');
+      w.rotate(
+        CUBE_TURNS[k],
+        'Turn the whole cube so a wrong top corner is at the front right.',
+        'The top corner at the front right is in the wrong spot or twisted.',
+      );
       w.step(
         'moves',
         insert,
@@ -213,6 +231,7 @@ function whiteCorners(w: PlanWriter): void {
     w.rotate(
       CUBE_TURNS[k],
       `Turn the whole cube so the home of the white-${colorList(others)} corner, between the ${name(others[0])} and ${name(others[1])} centers, is at the front right.`,
+      `The home of the white-${colorList(others)} corner, between the ${name(others[0])} and ${name(others[1])} centers, is already at the front right.`,
     );
     const j = BOTTOM_TURNS.findIndex((d) => {
       const turned = applyMoves(w.cube, d);
@@ -250,7 +269,11 @@ function middleLayer(w: PlanWriter): void {
     if (!bottom) {
       // No middle edge is waiting in the bottom layer, so one must be stuck in the middle.
       const k = CUBE_TURNS.findIndex((y) => !isSlotSolved(applyMoves(w.cube, y), FRONT_RIGHT_EDGE));
-      w.rotate(CUBE_TURNS[k], 'Turn the whole cube so a wrong middle edge is at the front right.');
+      w.rotate(
+        CUBE_TURNS[k],
+        'Turn the whole cube so a wrong middle edge is at the front right.',
+        'The middle edge at the front right is in the wrong spot or flipped.',
+      );
       w.step(
         'moves',
         algorithm('middleRight'),
@@ -262,7 +285,11 @@ function middleLayer(w: PlanWriter): void {
     const down = w.cube.stickers[bottom.stickers[0]]; // the square on the bottom face
     const side = w.cube.stickers[bottom.stickers[1]];
     const k = CUBE_TURNS.findIndex((y) => centerColor(applyMoves(w.cube, y), 'F') === side);
-    w.rotate(CUBE_TURNS[k], `Turn the whole cube so the ${name(side)} center faces you.`);
+    w.rotate(
+      CUBE_TURNS[k],
+      `Turn the whole cube so the ${name(side)} center faces you.`,
+      `Next: the ${name(side)}-${name(down)} edge. The ${name(side)} center already faces you.`,
+    );
     const j = BOTTOM_TURNS.findIndex((d) => {
       const turned = applyMoves(w.cube, d);
       return turned.stickers[25] === side && turned.stickers[28] === down; // bottom-front edge
@@ -296,7 +323,11 @@ function topPattern(cube: Cube): TopPattern {
 
 function turnOver(w: PlanWriter): void {
   w.startStage(5);
-  w.rotate(reorientTo(w.cube, 'Y', 'G'), 'Turn the cube over so yellow is on top.');
+  w.rotate(
+    reorientTo(w.cube, 'Y', 'G'),
+    'Turn the cube over so yellow is on top.',
+    'Yellow is already on top, with green facing you.',
+  );
   const pattern = topPattern(w.cube);
   const seen = pattern === 'cross' ? 'a yellow cross already' : `a ${pattern}`;
   w.step(
@@ -330,6 +361,9 @@ function yellowCross(w: PlanWriter): void {
     pattern === 'line'
       ? 'Line: turn the whole cube so the line runs left to right.'
       : 'Reverse L: turn the whole cube so the L points to the back and left.',
+    pattern === 'line'
+      ? 'Line: it already runs left to right.'
+      : 'Reverse L: it already points to the back and left.',
   );
   w.step(
     'moves',
@@ -403,6 +437,7 @@ function yellowEdges(w: PlanWriter): void {
     w.rotate(
       CUBE_TURNS[found.k],
       `Two matching edges side by side: turn the whole cube so they're at the ${where}.`,
+      `Two matching edges side by side: they're already at the ${where}.`,
     );
     w.step('moves', swap, "Do R U R' U R U2 R'.", 'yellow-edges');
     w.step('moves', TOP_TURNS[found.j], 'Turn the top to line the edges up with their centers.');
@@ -441,6 +476,7 @@ function placeCorners(w: PlanWriter): void {
     w.rotate(
       CUBE_TURNS[found.k],
       `One corner is already in its spot: turn the whole cube so it's at the ${spot}.`,
+      `One corner is already in its spot, at the ${spot}.`,
     );
     w.step(
       'moves',
@@ -531,6 +567,16 @@ export function solveBeginner(start: Cube): SolveResult {
     yellowEdges(w);
     placeCorners(w);
     twistCorners(w);
+    // A stage that needed nothing still gets a step, so the user is told it's done.
+    for (const stage of w.stages) {
+      if (stage.steps.length === 0) {
+        stage.steps.push({
+          kind: 'check',
+          moves: [],
+          text: 'This stage is already done, so move on.',
+        });
+      }
+    }
     const plan: SolvePlan = { start, stages: w.stages };
     const problem = selfCheck(plan);
     return problem ? { ok: false, error: problem } : { ok: true, plan };

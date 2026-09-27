@@ -107,3 +107,38 @@ describe('solveBeginner', () => {
     for (const { step } of everyStep) expect(step.text).not.toMatch(/sticker/i);
   });
 });
+
+describe('solveBeginner: every step says what to do', () => {
+  it('gives every stage at least one step, even when it is already done', () => {
+    for (const plan of plans) {
+      for (const stage of plan.stages)
+        expect(stage.steps.length, `stage ${stage.number}`).toBeGreaterThan(0);
+    }
+  });
+
+  it('always explains the case, even when the cube needs no whole-cube turn', () => {
+    for (const plan of plans) {
+      const texts = (n: number) => plan.stages[n - 1].steps.map((s) => s.text);
+      // Stage 3: every corner put in is named first.
+      const named = texts(3).filter((t) => t.includes('home of the white-')).length;
+      const inserted = texts(3).filter((t) =>
+        t.startsWith("Repeat R' D' R D until the corner"),
+      ).length;
+      expect(named, 'stage 3').toBe(inserted);
+      // Stage 6: the pattern is named before the algorithm is done once or twice from a hold.
+      const held = texts(6).filter((t) => t.includes('Line:') || t.includes('Reverse L:')).length;
+      const done = texts(6).filter(
+        (t) => t === "Do F R U R' U' F' once." || t === "Do F R U R' U' F' twice in a row.",
+      ).length;
+      expect(held, 'stage 6').toBe(done);
+      // Stage 8: the side-by-side hold is explained before the swap.
+      const sideBySide = texts(8).filter((t) => t.includes('side by side')).length;
+      const swaps = texts(8).filter((t) => t === "Do R U R' U R U2 R'.").length;
+      expect(sideBySide, 'stage 8').toBe(swaps);
+      // Stage 9: the corner already in its spot is pointed out before the algorithm.
+      const pointed = texts(9).filter((t) => t.includes('already in its spot')).length;
+      const cycles = texts(9).filter((t) => t.startsWith("Do U R U' L' U R' U' L")).length;
+      expect(pointed, 'stage 9').toBe(cycles);
+    }
+  });
+});
