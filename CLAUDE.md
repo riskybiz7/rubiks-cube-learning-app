@@ -23,8 +23,12 @@ first, and later by free-form camera scanning.
 logged in `docs/decisions-log.md`. Each build phase gets its own implementation plan
 in `docs/superpowers/plans/`, reviewed by the owner before any code is written.
 
-Phase ① (cube model + 3D algorithm player) is built. Next: phase ② plan
-(manual sticker entry + validation).
+Phase ① (cube model + 3D algorithm player) is merged into `main`. Phase ② (manual
+sticker entry + validation, including the pieces view and center-scheme checks) is in
+progress on branch `phase-2-manual-input`. The owner authorized building phase ② without
+check-ins; log questions for the owner in the phase ② review notes.
+
+GitHub: private repo `riskybiz7/rubiks-cube-learning-app` (remote `origin`).
 
 ## Stack
 
