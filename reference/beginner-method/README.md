@@ -22,7 +22,7 @@ Resized copies (longest side 1500px, 7.6 MB total) are in `small/` and **are** i
 | 2 | White cross | **white up** | yes | White cross; each cross edge matches its side center |
 | 3 | White corners | **white up** | yes | Whole white face done; top row of every side matches its center |
 | 4 | Middle layer | **white up** | yes | Top two layers of every side solved |
-| 5 | Flip | yellow up | **no** | Cube turned over; first two layers now on the bottom |
+| 5 | Flip + read the top | yellow up | **no** | Cube turned over (first two layers now on the bottom); owner then reads the yellow pattern on top (**dot**, **reverse L** as in 5.0, or **line**), which sets how many times stage 6's algorithm is done |
 | 6 | Yellow cross | yellow up | yes | Yellow cross on top; corners not yet yellow |
 | 7 | Check edges | yellow up | **no** | Two adjacent top edges match their side centers (7.0); the other two don't (7.1) |
 | 8 | Yellow edges | yellow up | yes | All four top edges match their side centers |
@@ -44,10 +44,10 @@ Each one must also pass an automated test before it ships in the app.
 | Stage | Proposed moves | Status |
 |---|---|---|
 | 1 Daisy | Intuitive (no fixed algorithm) | unconfirmed |
-| 2 White cross | Match each petal to its side center, then turn that face twice (`F2`) | unconfirmed |
+| 2 White cross | Match each petal to its side center, then turn that face twice (`F2`); after all 4, turn the cube over (white up) | **owner-confirmed** |
 | 3 White corners | White up, corner directly below its slot: repeat `R' D' R D` until solved | unconfirmed |
 | 4 Middle layer | White up, edge at bottom-front. To the **front-left** slot: `D L D' L' D' F' D F`. To the **front-right** slot: `D' R' D R D F D' F'` (the standard yellow-up pair, turned upside down) | unconfirmed |
-| 6 Yellow cross | `F R U R' U' F'`, repeated as needed (dot → L → line → cross) | unconfirmed |
+| 6 Yellow cross | **Procedure (owner-confirmed):** line → once. Reverse L held as in 5.0 → twice in a row, no re-positioning. Dot → once, turn the cube so the reverse L is held as in 5.0, then twice. **Algorithm** `F R U R' U' F'` | **owner-confirmed** (procedure and moves) |
 | 8 Yellow edges | `R U R' U R U2 R'` (hold position to be proven by test) | unconfirmed |
 | 9 Position corners | `U R U' L' U R' U' L` (hold position to be proven by test) | unconfirmed |
 | 10 Twist corners | `R' D' R D` repeated per corner; turn only the top layer between corners | unconfirmed |
