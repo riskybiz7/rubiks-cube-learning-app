@@ -206,8 +206,8 @@ Checked in this order; the first failures are reported in plain English:
 
 | Check | Example message |
 |---|---|
-| Every sticker has a color | "3 stickers still need a color." |
-| 9 stickers of each color | "10 reds and 8 oranges: one orange sticker was probably entered as red." |
+| Every square has a color | "3 squares still need a color." |
+| 9 squares of each color | "10 reds and 8 oranges: one orange square was probably entered as red." |
 | 6 different center colors | "Two centers are both white; each face has its own center color." |
 | Centers match the standard color scheme (white/yellow, red/orange, green/blue opposite; not a mirror image). Added 2026-09-27 at the owner's request: center caps on some cubes (e.g., GAN) can be swapped during reassembly | "The red and orange centers should be on opposite sides." / "The centers are a mirror image of a standard cube; two center caps may have been swapped." |
 | Every corner/edge is a real piece, no duplicates | "There's a red-orange edge, but red and orange are opposite sides and never touch." |
@@ -216,6 +216,9 @@ Checked in this order; the first failures are reported in plain English:
 | Piece swaps balance (parity) | Same style |
 
 ---
+
+**Wording (owner, 2026-09-27):** everything the user reads says **"squares"** for the colored
+faces of the small cubes, never "stickers". ("Sticker" remains the internal term in the code.)
 
 ## 6. Camera scanner (phase 4)
 

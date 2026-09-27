@@ -57,11 +57,9 @@ describe('validateStickers: each kind of problem', () => {
     const result = validateStickers(edited({ 0: null, 1: null, 13: null }));
     expect(result).toEqual({
       ok: false,
-      problems: [
-        { code: 'blank', message: '3 stickers still need a color.', stickers: [0, 1, 13] },
-      ],
+      problems: [{ code: 'blank', message: '3 squares still need a color.', stickers: [0, 1, 13] }],
     });
-    expect(messages(validateStickers(edited({ 5: null })))).toBe('1 sticker still needs a color.');
+    expect(messages(validateStickers(edited({ 5: null })))).toBe('1 square still needs a color.');
   });
 
   it('reports only the first kind of problem', () => {
@@ -72,7 +70,7 @@ describe('validateStickers: each kind of problem', () => {
     const result = validateStickers(edited({ 10: 'O' }));
     expect(codes(result)).toEqual(['color-count']);
     expect(messages(result)).toContain('there are 8 red and 10 orange');
-    expect(messages(result)).toContain('One red sticker was probably entered as orange.');
+    expect(messages(result)).toContain('One red square was probably entered as orange.');
     if (!result.ok) {
       expect(result.problems[0].stickers).toContain(10);
       expect(result.problems[0].stickers).not.toContain(40); // the orange center isn't suspect
@@ -195,5 +193,40 @@ describe('validateStickers: robustness', () => {
         }
       }
     }
+  });
+});
+
+describe('validateStickers: wording', () => {
+  it('always says "square", never "sticker", in messages (owner preference)', () => {
+    const twisted = [...solved().stickers];
+    [twisted[8], twisted[9], twisted[20]] = [twisted[20], twisted[8], twisted[9]];
+    const cases: (Color | null)[][] = [
+      edited({ 0: null }), // blank
+      edited({ 10: 'O' }), // color count
+      swapped([[22, 0]]), // duplicate center
+      swapped([[13, 22]]), // centers not opposite
+      swapped([[13, 40]]), // mirror-image centers
+      swapped([[5, 43]]), // impossible edges
+      swapped([[9, 20]]), // corner colors in the wrong order
+      swapped([[9, 29]]), // impossible corner (top and bottom colors on one corner)
+      edited({ 19: 'R', 16: 'G' }), // duplicate piece
+      twisted, // twisted corner
+      swapped([[7, 19]]), // flipped edge
+      swapped([
+        [7, 5],
+        [19, 10],
+      ]), // swapped pieces
+    ];
+    const seen = new Set<string>();
+    for (const stickers of cases) {
+      const result = validateStickers(stickers);
+      expect(result.ok).toBe(false);
+      if (result.ok) continue;
+      for (const p of result.problems) {
+        seen.add(p.code);
+        expect(p.message, p.code).not.toMatch(/sticker/i);
+      }
+    }
+    expect(seen.size).toBe(12); // every problem type
   });
 });

@@ -40,6 +40,13 @@ Suggested tries with your real cube:
 | Q2 | Are the "How to read each face" instructions clear with your cube in hand? (Top: green side nearest you. Bottom: green side at the top.) | Keep as written |
 | Q3 | Wording: validation says "stickers", the editor says "squares" (e.g. "47 stickers still need a color" vs "47 squares left to fill in"). Pick one? | Mixed for now; I'd pick "stickers" |
 
+### Owner answers (2026-09-27)
+
+- **Q1:** Keep the current phone layout; the owner will test on their phone after the first full draft.
+- **Q2:** Instructions confirmed clear; everything checked in the browser checks out.
+- **Q3:** Use **"squares"** everywhere. Done: all validation messages updated, with a test that
+  fails if "sticker" ever appears in a message.
+
 ## Decisions I made on your behalf
 
 1. **Centers are editable** (pre-filled for white-up / green-front). Otherwise your swapped-caps

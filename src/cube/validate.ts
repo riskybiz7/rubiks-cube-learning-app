@@ -73,7 +73,7 @@ export function validateStickers(stickers: readonly (Color | null)[]): Validatio
   // Stage 1: every sticker filled in.
   const blanks = stickers.flatMap((color, i) => (color === null ? [i] : []));
   if (blanks.length > 0) {
-    const needs = blanks.length === 1 ? 'sticker still needs' : 'stickers still need';
+    const needs = blanks.length === 1 ? 'square still needs' : 'squares still need';
     return fail([
       { code: 'blank', message: `${blanks.length} ${needs} a color.`, stickers: blanks },
     ]);
@@ -125,7 +125,7 @@ function checkColorCounts(cube: Cube): Problem | null {
     countOf(over[0]) === 10 &&
     countOf(under[0]) === 8
   ) {
-    message += ` One ${COLOR_NAMES[under[0]]} sticker was probably entered as ${COLOR_NAMES[over[0]]}.`;
+    message += ` One ${COLOR_NAMES[under[0]]} square was probably entered as ${COLOR_NAMES[over[0]]}.`;
   }
   // Suspects: every sticker of a color that appears too often. A center only counts
   // when another center has the same color, because then one of those centers is wrong.
@@ -192,10 +192,10 @@ function describeImpossiblePieces(
   const edgeProblems = reading.impossibleEdges.map((s): Problem => {
     const slot = EDGE_SLOTS[s];
     const [a, b] = slot.stickers.map(colorName);
-    const shows = a === b ? `two ${a} stickers` : `${a} and ${b}`;
+    const shows = a === b ? `two ${a} squares` : `${a} and ${b}`;
     return {
       code: 'impossible-edge',
-      message: `The ${placeName(slot.faces)} edge shows ${shows}, a combination no real edge has. One of its stickers is probably wrong.`,
+      message: `The ${placeName(slot.faces)} edge shows ${shows}, a combination no real edge has. One of its squares is probably wrong.`,
       stickers: [...slot.stickers],
     };
   });
@@ -203,7 +203,7 @@ function describeImpossiblePieces(
     const slot = CORNER_SLOTS[s];
     return {
       code: 'impossible-corner',
-      message: `The ${placeName(slot.faces)} corner shows ${listJoin(slot.stickers.map(colorName))}, a combination no real corner has. One of its stickers is probably wrong.`,
+      message: `The ${placeName(slot.faces)} corner shows ${listJoin(slot.stickers.map(colorName))}, a combination no real corner has. One of its squares is probably wrong.`,
       stickers: [...slot.stickers],
     };
   });
@@ -211,7 +211,7 @@ function describeImpossiblePieces(
     const slot = CORNER_SLOTS[s];
     return {
       code: 'mirrored-corner',
-      message: `The ${placeName(slot.faces)} corner has the right colors in the wrong order, so two of its stickers are probably swapped.`,
+      message: `The ${placeName(slot.faces)} corner has the right colors in the wrong order, so two of its squares are probably swapped.`,
       stickers: [...slot.stickers],
     };
   });
@@ -243,7 +243,7 @@ function checkDuplicates(pieces: Pieces): Problem[] {
       message:
         `${capitalize(names(repeated))} ${repeated.length === 1 ? 'appears' : 'appear'} more than once, ` +
         `and ${names(missing)} ${missing.length === 1 ? 'is' : 'are'} missing. ` +
-        'A sticker on one of the repeated pieces is probably wrong.',
+        'A square on one of the repeated pieces is probably wrong.',
       stickers: found.flatMap((p, s) => (repeated.includes(p) ? [...slots[s].stickers] : [])),
     });
   }
@@ -257,7 +257,7 @@ function checkHiddenRules(pieces: Pieces): Problem[] {
       code: 'corner-twist',
       message:
         'A corner is twisted in place. A real cube can never get this way just by turning, so either a corner ' +
-        'sticker was entered wrong, or a corner was twisted or popped out and put back. Compare the corner stickers with your cube.',
+        'square was entered wrong, or a corner was twisted or popped out and put back. Compare the corner squares with your cube.',
       stickers: [],
     });
   }
@@ -266,7 +266,7 @@ function checkHiddenRules(pieces: Pieces): Problem[] {
       code: 'edge-flip',
       message:
         "An edge is flipped in place. A real cube can never get this way just by turning, so either an edge's two " +
-        'stickers were entered the wrong way round, or an edge was popped out and put back flipped. Compare the edge stickers with your cube.',
+        'squares were entered the wrong way round, or an edge was popped out and put back flipped. Compare the edge squares with your cube.',
       stickers: [],
     });
   }
@@ -276,7 +276,7 @@ function checkHiddenRules(pieces: Pieces): Problem[] {
     problems.push({
       code: 'parity',
       message:
-        'Two pieces appear to be swapped. A real cube can never get this way just by turning, so either stickers were ' +
+        'Two pieces appear to be swapped. A real cube can never get this way just by turning, so either squares were ' +
         'entered in the wrong places, or the cube was taken apart and put back together differently.',
       stickers: [],
     });

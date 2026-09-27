@@ -87,6 +87,8 @@ Each module has one job and only depends on modules above it in this list:
   white cross → white corners → middle layer (stages 2 to 4 are done
   **white up**, confirmed by owner) → flip to yellow up → yellow cross →
   check edges → yellow edges → position corners → twist corners.
+- **User-facing wording:** say **"squares"** for the colored faces of the small cubes, never
+  "stickers" (owner's choice). "Sticker" is fine inside code.
 - **Color scheme:** standard, confirmed from the owner's photos: white opposite
   yellow, red opposite orange, blue opposite green.
 
