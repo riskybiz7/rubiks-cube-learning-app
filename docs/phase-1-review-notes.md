@@ -28,6 +28,15 @@ positions are right but couldn't watch the motion itself. Try `R U R' U'`, then
 | Q3 | Animations pause if you switch browser tabs and resume when you come back (normal browser behavior). OK? | Leave as is |
 | Q4 | Should phase ② also build the "pieces" view of the cube (8 corners + 12 edges)? Spec §3.1/§7 call for it, and the validation checks (twisted corner, flipped edge) need it. | Yes, in the phase ② plan |
 
+### Owner answers (2026-09-27)
+
+- **Q1:** Yes, the look matches what the owner envisioned.
+- **Q2:** 0.4 s default is good for now; get feedback from a real beginner later. Owner asked
+  for a pause button. It exists (Play turns into Pause while playing) but is easy to miss.
+  Proposed: show Play and Pause side by side, plus spacebar = play/pause. Pending the owner's OK.
+- **Q3:** Yes, keep the pause-when-tab-hidden behavior.
+- **Q4:** Explained the pieces view (8 corners + 12 edges, behind the scenes); awaiting the owner's answer.
+
 ## Decisions I made on your behalf
 
 1. **Branch instead of a separate working folder.** I built on the `phase-1-cube-model` branch named in the plan. `main` is untouched.
