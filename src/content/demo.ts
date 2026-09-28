@@ -2,23 +2,26 @@ import { solved } from '../cube/geometry';
 import { applyMoves } from '../cube/moves';
 import { mustParse, type Move } from '../cube/notation';
 import type { Cube } from '../cube/types';
-import { listSteps, solveBeginner, type SolvePlan } from '../solver/beginner';
+import { listSteps, type SolvePlan } from '../solver/plan';
 import { DEMO_SCRAMBLE } from './beginner';
+import { solveWith, type Method } from './methods';
 
-let cached: SolvePlan | null = null;
+const cached = new Map<Method, SolvePlan>();
 
-/** The beginner solve of the fixed demo scramble, used for the Learn screen's examples. */
-export function demoPlan(): SolvePlan {
-  if (!cached) {
-    const result = solveBeginner(applyMoves(solved(), mustParse(DEMO_SCRAMBLE)));
+/** The solve of the fixed demo scramble with `method`, used for the Learn screen's examples. */
+export function demoPlan(method: Method): SolvePlan {
+  let plan = cached.get(method);
+  if (!plan) {
+    const result = solveWith(method, applyMoves(solved(), mustParse(DEMO_SCRAMBLE)));
     if (!result.ok) throw new Error(result.error);
-    cached = result.plan;
+    plan = result.plan;
+    cached.set(method, plan);
   }
-  return cached;
+  return plan;
 }
 
 /** One stage of the demo: the cube it starts from and all its moves. */
-export function demoStage(index: number): { start: Cube; moves: Move[] } {
-  const steps = listSteps(demoPlan()).filter((s) => s.stageIndex === index);
+export function demoStage(index: number, method: Method): { start: Cube; moves: Move[] } {
+  const steps = listSteps(demoPlan(method)).filter((s) => s.stageIndex === index);
   return { start: steps[0].start, moves: steps.flatMap((s) => [...s.step.moves]) };
 }

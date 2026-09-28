@@ -37,6 +37,14 @@ describe('solveCfop', () => {
     }
   });
 
+  it('never shows two turns of the same layer in a row within a step (e.g. "U\' U")', () => {
+    for (const { step } of plans.flatMap(listSteps)) {
+      step.moves.forEach((move, i) => {
+        if (i > 0) expect(move.base, step.text).not.toBe(step.moves[i - 1].base);
+      });
+    }
+  });
+
   it('names the case for every algorithm step, from the right part of the library', () => {
     const expected: Record<number, string> = { 2: 'F2L', 3: 'OLL-2LOOK', 4: 'PLL-2LOOK' };
     for (const { stage, step } of plans.flatMap(listSteps)) {

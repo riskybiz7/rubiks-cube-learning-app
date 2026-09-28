@@ -106,6 +106,25 @@ export function invertMove(move: Move): Move {
   return { base: move.base, turns: (4 - move.turns) as Turns };
 }
 
+/**
+ * Add up back-to-back turns of the same layer ("U' U R" → "R", "U U" → "U2"), the way you'd
+ * tidy a list of moves before showing it. Checks after each merge, so chains fold fully.
+ */
+export function joinTurns(moves: readonly Move[]): Move[] {
+  const out: Move[] = [];
+  for (const move of moves) {
+    const last = out[out.length - 1];
+    if (last && last.base === move.base) {
+      const turns = (last.turns + move.turns) % 4;
+      out.pop();
+      if (turns !== 0) out.push({ base: move.base, turns: turns as Turns });
+    } else {
+      out.push(move);
+    }
+  }
+  return out;
+}
+
 /** Undo a whole algorithm: undo the last move first. */
 export function invertMoves(moves: readonly Move[]): Move[] {
   return [...moves].reverse().map(invertMove);

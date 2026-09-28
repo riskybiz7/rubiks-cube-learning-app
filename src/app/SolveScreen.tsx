@@ -1,20 +1,22 @@
 import { useMemo } from 'react';
-import { BEGINNER_STAGES } from '../content/beginner';
-import { beginnerMoveLabel } from '../content/cubeTurnWords';
+import { plainMoveLabel } from '../content/cubeTurnWords';
+import { STAGES_FOR, solveWith, type Method } from '../content/methods';
 import { holdDescription } from '../cube/describe';
 import { solved } from '../cube/geometry';
 import { applyMoves } from '../cube/moves';
 import { formatAlgorithm, type Move } from '../cube/notation';
 import type { Cube } from '../cube/types';
-import { listSteps, solveBeginner } from '../solver/beginner';
+import { listSteps } from '../solver/plan';
 import { CubePlayer } from './CubePlayer';
 import { AlgorithmCard } from './LearnScreen';
+import { MethodButtons } from './MethodButtons';
 
 /**
  * Everything about the current solve that must survive switching tabs. It lives in App
  * (not in this screen), because a screen is removed when another tab is showing.
  */
 export interface SolveState {
+  method: Method; // Beginner or CFOP
   useEntered: boolean; // solving the entered cube (true) or a random scramble (false)
   scramble: readonly Move[];
   index: number; // which step the user is on
@@ -35,7 +37,7 @@ export function SolveScreen(props: SolveScreenProps) {
     () => (useEntered && enteredCube ? enteredCube : applyMoves(solved(), state.scramble)),
     [useEntered, enteredCube, state.scramble],
   );
-  const result = useMemo(() => solveBeginner(start), [start]);
+  const result = useMemo(() => solveWith(state.method, start), [state.method, start]);
   const steps = useMemo(() => (result.ok ? listSteps(result.plan) : []), [result]);
   const index = Math.min(state.index, steps.length - 1);
   const current = steps[index];
@@ -44,6 +46,10 @@ export function SolveScreen(props: SolveScreenProps) {
   return (
     <>
       <h1>Solve my cube</h1>
+      <MethodButtons
+        method={state.method}
+        onChange={(method) => onStateChange({ ...state, method, index: 0 })}
+      />
       <div className="controls">
         <button
           className={useEntered ? 'active' : ''}
@@ -85,7 +91,7 @@ export function SolveScreen(props: SolveScreenProps) {
       {current && (
         <>
           <ol className="stage-list">
-            {BEGINNER_STAGES.map((stage, i) => (
+            {STAGES_FOR[state.method].map((stage, i) => (
               <li key={stage.number} className={i === current.stageIndex ? 'current' : ''}>
                 <button
                   onClick={() => {
@@ -115,16 +121,16 @@ export function SolveScreen(props: SolveScreenProps) {
           <CubePlayer
             moves={current.step.moves}
             start={current.start}
-            label={beginnerMoveLabel}
+            label={plainMoveLabel}
             caption={`${holdDescription(current.start)} Copy each turn on your cube.`}
           />
 
           <div className="controls">
             <button disabled={index === 0} onClick={() => goTo(index - 1)}>
-              ◀ Previous step
+              â—€ Previous step
             </button>
             <button disabled={index >= steps.length - 1} onClick={() => goTo(index + 1)}>
-              Next step ▶
+              Next step â–¶
             </button>
           </div>
           <p className="hint">

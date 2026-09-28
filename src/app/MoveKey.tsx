@@ -9,14 +9,14 @@ import {
   type KeyMethod,
 } from '../content/moveKey';
 
-/** On an x, y or z row: what the beginner screens call that turn, e.g. SPIN LEFT (y). */
-function BeginnerWords({ base }: { base: MoveBase }) {
+/** On an x, y or z row: what the lesson screens call that turn, e.g. SPIN LEFT (y). */
+function LessonWords({ base }: { base: MoveBase }) {
   const words = CUBE_TURN_WORDS.filter((word) => word.base === base);
   if (words.length === 0) return null;
   return (
     <span className="variants">
       {' '}
-      Beginner screens say{' '}
+      Lesson screens say{' '}
       {words.map((word, i) => (
         <span key={word.label}>
           {i > 0 && ', '}
@@ -71,7 +71,7 @@ export function MoveKey() {
                         Also <code>{entry.base}'</code> (other way) and <code>{entry.base}2</code>{' '}
                         (twice).
                       </span>
-                      <BeginnerWords base={entry.base} />
+                      <LessonWords base={entry.base} />
                     </td>
                   </tr>
                 ))}
@@ -79,7 +79,7 @@ export function MoveKey() {
           </table>
         </section>
       ))}
-      {method === 'beginner' && (
+      {method !== 'all' && (
         <section>
           <h3>Turning the whole cube</h3>
           <p className="hint">These move the whole cube in your hands. No layers turn.</p>

@@ -278,3 +278,11 @@ h2 {
 .move-key .variants {
   color: #555;
 }
+
+.algorithm-group {
+  margin: 6px 0;
+}
+.algorithm-group summary {
+  cursor: pointer;
+  font-weight: 600;
+}

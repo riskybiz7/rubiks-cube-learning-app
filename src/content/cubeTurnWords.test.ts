@@ -3,7 +3,7 @@ import { solved } from '../cube/geometry';
 import { applyMoves } from '../cube/moves';
 import { mustParse } from '../cube/notation';
 import { centerColor } from '../solver/checks';
-import { beginnerMoveLabel, CUBE_TURN_WORDS } from './cubeTurnWords';
+import { plainMoveLabel, CUBE_TURN_WORDS } from './cubeTurnWords';
 
 describe('cube turns in words (SPIN, TIP, ROLL)', () => {
   it('has one word for every whole-cube turn: x, y, z each one way, the other way, and twice', () => {
@@ -19,7 +19,7 @@ describe('cube turns in words (SPIN, TIP, ROLL)', () => {
   });
 
   it('shows words for cube turns and keeps letters for side turns', () => {
-    const labels = mustParse("y y' y2 x x' z' R U' F2").map(beginnerMoveLabel);
+    const labels = mustParse("y y' y2 x x' z' R U' F2").map(plainMoveLabel);
     expect(labels).toEqual([
       'SPIN LEFT',
       'SPIN RIGHT',

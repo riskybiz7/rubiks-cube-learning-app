@@ -1,7 +1,7 @@
 import { CFOP_ALGORITHMS, CFOP_STAGES, GROUPS, inGroup, type CfopAlgorithm } from '../content/cfop';
 import { COLOR_NAMES, colorList } from '../cube/describe';
 import { applyMoves, isSolved } from '../cube/moves';
-import { mustParse, type Move } from '../cube/notation';
+import { joinTurns, mustParse, type Move } from '../cube/notation';
 import type { Color, Cube } from '../cube/types';
 import { validateStickers } from '../cube/validate';
 import {
@@ -39,7 +39,8 @@ function findCase(
 ): { moves: Move[]; algorithm: CfopAlgorithm } | null {
   for (const algorithm of algorithms) {
     for (const top of TOP_TURNS) {
-      const moves = [...top, ...MOVES.get(algorithm.id)!];
+      // The top turn that lines up the case may merge with the algorithm's own first turn.
+      const moves = joinTurns([...top, ...MOVES.get(algorithm.id)!]);
       if (goal(applyMoves(cube, moves))) return { moves, algorithm };
     }
   }
