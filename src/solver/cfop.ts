@@ -112,6 +112,31 @@ function holdsAnotherSlotsPiece(cube: Cube): boolean {
   return (slotCorner && !isMine(cornerColors)) || (slotEdge && !isMine(edgeColors));
 }
 
+/** Can some unfinished slot be finished straight away (from the front right, after a cube turn)? */
+const someSlotReady = (cube: Cube) =>
+  CUBE_TURNS.some((turn) => {
+    const turned = applyMoves(cube, turn);
+    return !isPairSolved(turned, FRONT_RIGHT) && findCase(turned, F2L, frontRightDone) !== null;
+  });
+
+/**
+ * Which stuck slot to empty, and which top turn to do first. R U R' also drops two top
+ * pieces into the slot, so look one step ahead: prefer the choice after which some slot
+ * can be finished straight away, and among those the one with the fewest turns.
+ */
+function choosePullOut(cube: Cube): { quarters: number; top: Move[] } | null {
+  let fallback: { quarters: number; top: Move[] } | null = null;
+  for (const top of TOP_TURNS) {
+    for (let quarters = 0; quarters < 4; quarters++) {
+      const turned = applyMoves(cube, CUBE_TURNS[quarters]);
+      if (!holdsAnotherSlotsPiece(turned)) continue;
+      fallback ??= { quarters, top: [] };
+      if (someSlotReady(applyMoves(turned, [...top, ...PULL_OUT]))) return { quarters, top };
+    }
+  }
+  return fallback;
+}
+
 function firstTwoLayers(w: PlanWriter): void {
   w.startStage(2);
   for (let guard = 0; guard < 16; guard++) {
@@ -142,14 +167,17 @@ function firstTwoLayers(w: PlanWriter): void {
       continue;
     }
     // No slot can be finished yet: a piece is stuck in another slot. Take one out.
-    const quarters = [0, 1, 2, 3].find((q) =>
-      holdsAnotherSlotsPiece(applyMoves(w.cube, CUBE_TURNS[q])),
-    );
-    if (quarters === undefined) break;
+    const pull = choosePullOut(w.cube);
+    if (!pull) break;
     w.rotate(
-      CUBE_TURNS[quarters],
+      CUBE_TURNS[pull.quarters],
       "Turn the whole cube so the slot holding another slot's piece is at the front right.",
       "The slot at the front right holds another slot's piece.",
+    );
+    w.step(
+      'moves',
+      pull.top,
+      'Turn the top first, so the pieces you still need stay out of this slot.',
     );
     w.step(
       'moves',

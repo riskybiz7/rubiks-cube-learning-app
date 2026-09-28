@@ -9,7 +9,8 @@ import { CFOP_HOME } from '../test-utils/cfopStates';
 import { randomMoves, seededRandom } from '../test-utils/random';
 import { centerColor } from './checks';
 import { cfopSelfCheck, solveCfop } from './cfop';
-import { listSteps, type SolvePlan } from './plan';
+import { crossMoves } from './cross';
+import { listSteps, reorientTo, type SolvePlan } from './plan';
 
 function mustSolve(cube: Cube): SolvePlan {
   const result = solveCfop(cube);
@@ -89,6 +90,25 @@ describe('solveCfop', () => {
     expect(moving[0].stage.number).toBe(4);
     expect(moving[0].step.text).toContain('line it up');
   });
+
+  it('never takes pieces out of slots more than twice in a row (1,000 cubes with the cross done)', () => {
+    const random = seededRandom(47);
+    let most = 0;
+    for (let i = 0; i < 1000; i++) {
+      // A random cube with the cross already done: the hardest mix for F2L.
+      const scrambled = applyMoves(CFOP_HOME, randomMoves(25, random));
+      const held = applyMoves(scrambled, reorientTo(scrambled, 'Y', 'G'));
+      const sides = (['F', 'R', 'B', 'L'] as const).map((f) => centerColor(held, f));
+      const plan = mustSolve(applyMoves(held, crossMoves(held, sides)!));
+      let inARow = 0;
+      for (const { step } of listSteps(plan)) {
+        if (step.text.startsWith('Take its pieces out')) inARow++;
+        if (step.algorithmId) inARow = 0;
+        most = Math.max(most, inARow);
+      }
+    }
+    expect(most).toBeLessThanOrEqual(2);
+  }, 30_000);
 
   it('takes pieces out of the wrong slot first when it has to', () => {
     // Swap the front-right pair with the back-left pair: each is stuck in the other's slot.
