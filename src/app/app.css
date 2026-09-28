@@ -234,3 +234,40 @@ h2 {
   border-color: #1d1d1f;
   color: #fff;
 }
+.move-key {
+  margin-top: 16px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #fff;
+}
+.move-key summary {
+  font-weight: 600;
+  cursor: pointer;
+}
+.move-key h3 {
+  margin: 12px 0 4px;
+  font-size: 1rem;
+}
+.move-key .reading-tips {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+.move-key table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.move-key th,
+.move-key td {
+  padding: 4px 6px;
+  border-top: 1px solid #eee;
+  text-align: left;
+  vertical-align: top;
+}
+.move-key th code {
+  font:
+    600 1.1rem ui-monospace,
+    monospace;
+}
+.move-key .variants {
+  color: #555;
+}

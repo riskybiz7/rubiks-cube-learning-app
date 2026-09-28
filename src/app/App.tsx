@@ -5,6 +5,7 @@ import type { Cube } from '../cube/types';
 import { blankStickers, type EditorStickers } from '../input/editorState';
 import { EnterCubeScreen } from './EnterCubeScreen';
 import { LearnScreen } from './LearnScreen';
+import { MoveKey } from './MoveKey';
 import { PlayerScreen } from './PlayerScreen';
 import { SolveScreen, type SolveState } from './SolveScreen';
 
@@ -86,6 +87,9 @@ export function App() {
           }}
         />
       )}
+
+      {/* Always at the very bottom, whichever screen is showing. */}
+      <MoveKey />
     </main>
   );
 }
