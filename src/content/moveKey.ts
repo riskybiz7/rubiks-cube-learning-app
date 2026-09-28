@@ -181,3 +181,30 @@ export const MOVE_KEY: readonly MoveKeyEntry[] = [
     to: 'L',
   },
 ];
+
+/** Which moves the key shows. CFOP joins this list in phase 3b. */
+export type KeyMethod = 'beginner' | 'all';
+
+export const KEY_METHODS: readonly { method: KeyMethod; label: string }[] = [
+  { method: 'beginner', label: 'Beginner (daisy) method' },
+  { method: 'all', label: 'All moves' },
+];
+
+/**
+ * The letters the beginner lessons use: the algorithms' side turns plus the whole-cube
+ * turns the Solve screen writes out. A test solves many scrambles to confirm this list
+ * matches exactly, so it can't drift from the lessons.
+ */
+const BEGINNER_MOVES: readonly MoveBase[] = ['U', 'D', 'R', 'L', 'F', 'x', 'y', 'z'];
+
+const WIDE_TURN_TIP = READING_TIPS[3];
+
+export function keyEntries(method: KeyMethod): readonly MoveKeyEntry[] {
+  if (method === 'all') return MOVE_KEY;
+  return MOVE_KEY.filter((entry) => BEGINNER_MOVES.includes(entry.base));
+}
+
+export function readingTips(method: KeyMethod): readonly string[] {
+  if (method === 'all') return READING_TIPS;
+  return READING_TIPS.filter((tip) => tip !== WIDE_TURN_TIP);
+}

@@ -1,8 +1,45 @@
 import { describe, expect, it } from 'vitest';
-import { STICKER_SLOTS } from '../cube/geometry';
-import { AXIS_INDEX, MOVE_SPECS, movePermutation } from '../cube/moves';
-import { MOVE_BASES } from '../cube/notation';
-import { MOVE_KEY, READING_TIPS } from './moveKey';
+import { solved, STICKER_SLOTS } from '../cube/geometry';
+import { applyMoves, AXIS_INDEX, MOVE_SPECS, movePermutation } from '../cube/moves';
+import { MOVE_BASES, mustParse, type MoveBase } from '../cube/notation';
+import { solveBeginner } from '../solver/beginner';
+import { randomMoves, seededRandom } from '../test-utils/random';
+import { BEGINNER_ALGORITHMS } from './beginner';
+import { keyEntries, MOVE_KEY, READING_TIPS, readingTips } from './moveKey';
+
+/** Every move letter the beginner lessons show: the algorithms plus 300 solver plans. */
+function lettersTheBeginnerLessonsUse(): MoveBase[] {
+  const used = new Set<MoveBase>();
+  for (const algorithm of Object.values(BEGINNER_ALGORITHMS)) {
+    for (const move of mustParse(algorithm.moves)) used.add(move.base);
+  }
+  const random = seededRandom(7);
+  for (let i = 0; i < 300; i++) {
+    const result = solveBeginner(applyMoves(solved(), randomMoves(25, random)));
+    if (!result.ok) throw new Error(result.error);
+    for (const stage of result.plan.stages) {
+      for (const step of stage.steps) for (const move of step.moves) used.add(move.base);
+    }
+  }
+  return [...used].sort();
+}
+
+describe('move key: choosing a method', () => {
+  it('the beginner key lists exactly the moves the beginner lessons use', () => {
+    const shown = keyEntries('beginner').map((entry) => entry.base);
+    expect(shown.sort()).toEqual(lettersTheBeginnerLessonsUse());
+  });
+
+  it('"All moves" shows the whole key', () => {
+    expect(keyEntries('all')).toEqual(MOVE_KEY);
+    expect(readingTips('all')).toEqual(READING_TIPS);
+  });
+
+  it('the beginner tips leave out wide turns', () => {
+    expect(readingTips('beginner').join(' ')).not.toMatch(/wide/i);
+    expect(readingTips('beginner').length).toBeGreaterThan(0);
+  });
+});
 
 describe('move key', () => {
   it('explains every move letter the app understands, once', () => {
