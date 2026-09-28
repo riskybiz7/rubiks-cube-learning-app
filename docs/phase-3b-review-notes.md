@@ -16,21 +16,24 @@ Branch `phase-3b-cfop`, stacked on `phase-3a-beginner`. Plan:
 
 ## Measurements
 
-These come from a throwaway test, deleted afterwards:
-- 1,000 scrambles, each made of 25 random face turns (`randomScramble`, `seededRandom(99)`);
-- run with `npx vitest run` on 2026-09-28;
-- layer turns don't count whole-cube turns (SPIN/TIP/ROLL).
+**Source:** `src/solver/cfop.measure.test.ts`, kept so the figures can be re-run. It is skipped in normal test runs. To run it in PowerShell:
+`$env:VITE_MEASURE = '1'; npx vitest run src/solver/cfop.measure.test.ts --silent=false`
+
+- **Inputs:** 1,000 scrambles, each 25 random face turns (`randomScramble`, `seededRandom(99)`).
+- **Run:** 2026-09-28, after the final-review fixes.
+- **Layer turns** don't count whole-cube turns (SPIN/TIP/ROLL).
 
 | Figure | Min | Median | Max |
 |---|---|---|---|
 | Cross, as the app teaches it (one edge at a time) | 3 | 9 | 13 |
 | Shortest possible cross, all four edges at once (same scrambles) | 3 | 6 | 7 |
 | Layer turns for the whole solve | 41 | 84 | 111 |
-| Steps on the Solve screen | 14 | 18 | 29 |
+| Steps on the Solve screen | 16 | 23 | 31 |
 
 - Crosses that used a back-face turn: 847 of 1,000.
 - Solves that needed a piece taken out of the wrong F2L slot first: 375 of 1,000.
-- Time to work out a solve: 2.2 ms on average (including building the cross tables on first use).
+- Most pull-outs in a row, with no F2L case in between: 1. A separate test on 1,000 cubes with the cross already done (a harder mix) holds it to 2 or fewer.
+- Average time to work out a solve: 2.9 ms. This includes building the cross tables on first use and depends on the computer. An earlier run measured 2.2 ms, before the review fixes.
 
 ## Questions for the owner
 
@@ -67,9 +70,25 @@ They are logged as #29–#34 in `docs/decisions-log.md`.
   - *Plan:* pull out any slot holding a "wrong" piece.
   - *Built:* pull out only a slot holding a piece *another slot needs*.
   - *Why:* yellow top-layer pieces sitting in a slot counted as "wrong", and the solver kept pulling the same slot out forever.
-- **Merged top turns.**
-  - *The problem:* the top turn that lines up a case can merge with the algorithm's own first turn. The screen showed "U' U R U2 …".
-  - *The fix:* back-to-back turns of the same layer are now added together. The result on the cube is the same, but the step may not start literally with the algorithm as printed on its card.
+- **Lining up a case is its own step.**
+  - *The problem:* the top turn that lines up a case showed up merged with the algorithm, e.g. "U' U R U2 …".
+  - *First fix (dropped):* back-to-back turns were added together. The final reviewer pointed out that the moves then no longer matched the algorithm card.
+  - *Final:* a separate "Turn the top to line up …" step, then the algorithm exactly as on its card. A test enforces the match.
+
+## Fixed after the final review
+
+A fresh reviewer read the whole branch and ran about 9,000 extra probe solves; none failed. It raised:
+- **Garbled arrows** on the Solve screen's Previous/Next buttons ("â—€"). A PowerShell edit had double-encoded them. Fixed, with a new test that scans every source file for this.
+- **Algorithm steps that didn't match their cards.** Fixed as described above.
+- **Pull-out chains.** Taking pieces out of a slot could chain up to 4–6 times in a row. The solver now looks one step ahead (which slot, and a top turn first), and a test keeps it to 2 or fewer in a row.
+- **Figures that couldn't be re-run.** The measurement script had been deleted. It is now kept, as described above.
+
+Smaller points were deferred:
+- **Stage 1 message:** doesn't say "the cross is already done" when it is.
+- **Pull-out wording:** doesn't name the slot or the piece.
+- **Missing "Solved!":** the last step skips the word when no final top turn is needed.
+- **Hold test:** covers 5 of the 24 holds (all 24 pass in the reviewer's probe).
+- **First-solve delay:** the first CFOP solve spends about 150 ms building the cross table.
 - **Small ones:**
   - a test made stricter (the CFOP demo test);
   - one shared button row for choosing the method;
