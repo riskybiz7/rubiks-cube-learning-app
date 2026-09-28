@@ -43,7 +43,7 @@ Each one must also pass an automated test before it ships in the app.
 
 | Stage | Proposed moves | Status |
 |---|---|---|
-| 1 Daisy | Intuitive (no fixed algorithm) | unconfirmed |
+| 1 Daisy | Intuitive (no fixed algorithm). **Owner preference (2026-09-28):** never turn the back face; turn the whole cube so that side faces you and turn the front instead ("U F", not "U B"). Same for stage 2 petals whose center is at the back | preference owner-confirmed; moves intuitive |
 | 2 White cross | Match each petal to its side center, then turn that face twice (`F2`); after all 4, turn the cube over (white up) | **owner-confirmed** |
 | 3 White corners | White up, corner directly below its slot: repeat `R' D' R D` until solved | unconfirmed |
 | 4 Middle layer | White up, edge at bottom-front. To the **front-left** slot: `D L D' L' D' F' D F`. To the **front-right** slot: `D' R' D R D F D' F'` (the standard yellow-up pair, turned upside down) | unconfirmed |

@@ -143,6 +143,54 @@ function petalColors(cube: Cube): Color[] {
   );
 }
 
+/**
+ * How face names change after turning the whole cube with y (like turning the top layer):
+ * the back ends up on the right, the right at the front, and so on. Top and bottom stay.
+ */
+const FACE_AFTER_CUBE_TURN: Partial<Record<MoveBase, MoveBase>> = {
+  F: 'L',
+  R: 'F',
+  B: 'R',
+  L: 'B',
+  U: 'U',
+  D: 'D',
+};
+
+/**
+ * The same physical face turns, named as they'd be after turning the whole cube
+ * `quarters` times with y. Only face turns are expected (that's all the daisy search uses).
+ */
+function renameAfterCubeTurns(moves: readonly Move[], quarters: number): Move[] {
+  return moves.map((move) => {
+    let base = move.base;
+    for (let i = 0; i < quarters; i++) {
+      const renamed = FACE_AFTER_CUBE_TURN[base];
+      if (!renamed) throw new Error(`Can't rename ${base} after a cube turn.`);
+      base = renamed;
+    }
+    return { base, turns: move.turns };
+  });
+}
+
+const usesBackFace = (moves: readonly Move[]) => moves.some((m) => m.base === 'B');
+
+/**
+ * The owner never has a beginner turn the back face: instead, turn the whole cube so
+ * that side faces you and turn the front (e.g. "U F", not "U B"). It's easier to line a
+ * petal up with a center that faces you directly. Adds that cube-turn step when needed
+ * and returns the same physical turns, named for the new hold.
+ */
+function withoutBackFace(w: PlanWriter, moves: readonly Move[]): Move[] {
+  if (!usesBackFace(moves)) return [...moves];
+  // A half turn of the cube (y2) brings the back to the front; try it first.
+  const quarters = [2, 1, 3].find((q) => !usesBackFace(renameAfterCubeTurns(moves, q)));
+  if (quarters === undefined) return [...moves];
+  const facing = centerColor(applyMoves(w.cube, CUBE_TURNS[quarters]), 'F');
+  const why = `Turn the whole cube so the ${name(facing)} center faces you.`;
+  w.rotate(CUBE_TURNS[quarters], why, why);
+  return renameAfterCubeTurns(moves, quarters);
+}
+
 function daisy(w: PlanWriter): void {
   w.startStage(1);
   w.rotate(
@@ -152,8 +200,9 @@ function daisy(w: PlanWriter): void {
   );
   while (petalColors(w.cube).length < 4) {
     const before = petalColors(w.cube);
-    const moves = searchMoves(w.cube, (c) => petalColors(c).length > before.length, 5);
-    if (!moves) throw new Error("Couldn't find a way to add a daisy petal.");
+    const found = searchMoves(w.cube, (c) => petalColors(c).length > before.length, 5);
+    if (!found) throw new Error("Couldn't find a way to add a daisy petal.");
+    const moves = withoutBackFace(w, found);
     const added = petalColors(applyMoves(w.cube, moves)).filter((c) => !before.includes(c));
     const edges = listJoin(added.map((c) => `white-${name(c)}`));
     w.step(
@@ -181,10 +230,13 @@ function whiteCross(w: PlanWriter): void {
     }
     if (!choice) throw new Error("Couldn't line up a daisy petal.");
     const color = name(centerColor(w.cube, choice.face));
+    // A petal at the back is done from the front instead (the cube is turned first).
+    const moves = withoutBackFace(w, [...TOP_TURNS[choice.k], { base: choice.face, turns: 2 }]);
+    const face = moves[moves.length - 1].base as Face;
     w.step(
       'moves',
-      [...TOP_TURNS[choice.k], { base: choice.face, turns: 2 }],
-      `Turn the top until the white-${color} petal sits above the ${color} center, then turn the ${faceWord(choice.face)} face twice to send it down.`,
+      moves,
+      `Turn the top until the white-${color} petal sits above the ${color} center, then turn the ${faceWord(face)} face twice to send it down.`,
     );
   }
   w.rotate(

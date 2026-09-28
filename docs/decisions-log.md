@@ -31,6 +31,8 @@ unless marked otherwise. This log feeds the design spec.
 | 22 | Phone layout check | **After the first full draft**, on the owner's phone | Owner has not built a phone app before; keep the current responsive design until then. |
 | 23 | Editor instructions | **Confirmed clear** by the owner in the browser | "How to read each face" kept as written. |
 | 24 | User-facing wording | Always **"squares"**, never "stickers" | Owner's choice. Guarded by a test over every validation message type. "Sticker" stays the internal code term. |
+| 25 | No back-face turns for beginners | **Turn the whole cube so that side faces you, then turn the front** ("U F", not "U B") | Owner, 2026-09-28: not a fan of B turns for first-time learners; prefers turning the cube's orientation. First said "on the right", then corrected to **facing you**: it's easier to line the daisy up with a center that faces you directly. Applies to the whole beginner method (only stage 1 daisy and stage 2 white cross ever used B; the fixed algorithms never do). Same layer turns; the app shows a "turn the whole cube" step first. Left-face turns unchanged unless the owner asks. CFOP (phase ③b): apply the same where it doesn't make an algorithm awkward, and flag each case. Guarded by tests over 300 scrambles. |
+| 26 | Feedback timing | **Small feedback any time; big rethinks at the full-draft review** | Owner asked; nothing is locked. |
 
 ## Design sections approved
 

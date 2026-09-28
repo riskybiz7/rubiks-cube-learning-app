@@ -142,3 +142,34 @@ describe('solveBeginner: every step says what to do', () => {
     }
   });
 });
+
+describe('solveBeginner: no back-face turns for a beginner', () => {
+  it('never turns the back face; the cube is turned so that side faces you (owner: "U F", not "U B")', () => {
+    const turnedToFront = { daisy: 0, cross: 0 };
+    for (const plan of plans) {
+      for (const stage of plan.stages) {
+        stage.steps.forEach((step, i) => {
+          const where = `stage ${stage.number}: ${formatAlgorithm(step.moves)}`;
+          expect(
+            step.moves.some((m) => m.base === 'B'),
+            where,
+          ).toBe(false);
+          const previous = i > 0 ? stage.steps[i - 1] : null;
+          if (previous?.kind !== 'rotate' || !previous.text.includes('center faces you')) return;
+          if (stage.number === 1) turnedToFront.daisy++;
+          if (stage.number === 2) {
+            turnedToFront.cross++;
+            expect(step.text, where).toContain('turn the front face twice');
+          }
+        });
+      }
+    }
+    // Both situations really come up in these scrambles.
+    expect(turnedToFront.daisy).toBeGreaterThan(0);
+    expect(turnedToFront.cross).toBeGreaterThan(0);
+  });
+
+  it('never tells a beginner to turn the back face in words either', () => {
+    for (const { step } of everyStep) expect(step.text).not.toContain('back face');
+  });
+});

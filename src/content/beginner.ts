@@ -92,6 +92,7 @@ export const BEGINNER_STAGES: readonly StageInfo[] = [
     goal: 'Four white edges around the yellow center, white squares facing up, like petals.',
     howTo:
       "Find a white edge and bring it up beside the yellow center with its white square facing up. Turn the top first so you don't knock off a petal you already have.",
+    tip: 'Never turn the back face here: turn the whole cube so that side faces you, then turn the front face instead (for example U F rather than U B).',
     algorithmIds: [],
   },
   {
@@ -101,6 +102,7 @@ export const BEGINNER_STAGES: readonly StageInfo[] = [
     goal: 'A white cross on the white face, each edge matching the center beside it.',
     howTo:
       "For each petal: turn the top until the petal's other color sits above the center of the same color, then turn that face twice. The white square drops to the bottom. When all four are down, turn the cube over so white is on top.",
+    tip: 'If that center is at the back, turn the whole cube so it faces you, then turn the front face twice.',
     algorithmIds: [],
   },
   {
