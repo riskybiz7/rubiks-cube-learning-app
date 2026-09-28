@@ -101,8 +101,8 @@ export const BEGINNER_STAGES: readonly StageInfo[] = [
     hold: 'Yellow on top, then white on top.',
     goal: 'A white cross on the white face, each edge matching the center beside it.',
     howTo:
-      "For each petal: turn the top until the petal's other color sits above the center of the same color, then turn that face twice. The white square drops to the bottom. When all four are down, turn the cube over so white is on top.",
-    tip: 'If that center is at the back, turn the whole cube so it faces you, then turn the front face twice.',
+      "For each petal: turn the whole cube so the center matching the petal's other color faces you, turn the top until the petal sits right above that center, then turn the front face twice. The white square drops to the bottom. When all four are down, turn the cube over so white is on top.",
+    tip: 'Always work from the front: lining a petal up is easiest with its center facing you directly.',
     algorithmIds: [],
   },
   {
@@ -182,4 +182,4 @@ export const BEGINNER_STAGES: readonly StageInfo[] = [
 ];
 
 /** A fixed scramble used for the Learn screen's examples. */
-export const DEMO_SCRAMBLE = "D2 R2 B' U2 F' L2 B D2 F' R2 U' L B' U' F D' R' B2 U";
+export const DEMO_SCRAMBLE = "D B' R2 L2 B2 F R F L R F2 L R2 D' R' F' B L R2 U'";

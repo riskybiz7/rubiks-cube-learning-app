@@ -173,3 +173,26 @@ describe('solveBeginner: no back-face turns for a beginner', () => {
     for (const { step } of everyStep) expect(step.text).not.toContain('back face');
   });
 });
+
+describe('solveBeginner: white cross the way the owner does it', () => {
+  it('sends every petal down from the front: that center faces you first (owner: "every petal\'s center faces you")', () => {
+    for (const plan of plans) {
+      const cross = plan.stages[1].steps;
+      const petals = cross.filter((s) => s.kind === 'moves');
+      expect(petals).toHaveLength(4);
+      cross.forEach((step, i) => {
+        if (step.kind !== 'moves') return;
+        const where = formatAlgorithm(step.moves);
+        // Only top and front turns, ending with the front turned twice.
+        expect(
+          step.moves.every((m) => m.base === 'U' || m.base === 'F'),
+          where,
+        ).toBe(true);
+        expect(step.moves[step.moves.length - 1], where).toEqual({ base: 'F', turns: 2 });
+        expect(step.text, where).toContain('turn the front face twice');
+        // The step before says which center faces you (turned there, or already there).
+        expect(i > 0 && cross[i - 1].text.includes('faces you'), where).toBe(true);
+      });
+    }
+  });
+});

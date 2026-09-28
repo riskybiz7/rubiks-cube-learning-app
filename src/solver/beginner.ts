@@ -230,13 +230,22 @@ function whiteCross(w: PlanWriter): void {
     }
     if (!choice) throw new Error("Couldn't line up a daisy petal.");
     const color = name(centerColor(w.cube, choice.face));
-    // A petal at the back is done from the front instead (the cube is turned first).
-    const moves = withoutBackFace(w, [...TOP_TURNS[choice.k], { base: choice.face, turns: 2 }]);
-    const face = moves[moves.length - 1].base as Face;
+    // The owner sends every petal down from the front: first turn the whole cube so the
+    // matching center faces you, then the same turns are "top, then front twice".
+    const moves = [...TOP_TURNS[choice.k], { base: choice.face, turns: 2 as Turns }];
+    const quarters = [0, 1, 2, 3].find(
+      (q) => renameAfterCubeTurns([moves[moves.length - 1]], q)[0].base === 'F',
+    );
+    if (quarters === undefined) throw new Error("Couldn't turn a petal's center to face you.");
+    w.rotate(
+      CUBE_TURNS[quarters],
+      `Turn the whole cube so the ${color} center faces you.`,
+      `The ${color} center already faces you.`,
+    );
     w.step(
       'moves',
-      moves,
-      `Turn the top until the white-${color} petal sits above the ${color} center, then turn the ${faceWord(face)} face twice to send it down.`,
+      renameAfterCubeTurns(moves, quarters),
+      `Turn the top until the white-${color} petal sits above the ${color} center, then turn the front face twice to send it down.`,
     );
   }
   w.rotate(
