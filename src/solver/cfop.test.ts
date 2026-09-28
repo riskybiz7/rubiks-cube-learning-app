@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { CFOP_ALGORITHMS } from '../content/cfop';
 import { solved } from '../cube/geometry';
 import { applyMoves } from '../cube/moves';
-import { mustParse } from '../cube/notation';
+import { formatAlgorithm, mustParse } from '../cube/notation';
 import { fromPieces, readPieces } from '../cube/pieces';
 import type { Cube } from '../cube/types';
 import { CFOP_HOME } from '../test-utils/cfopStates';
@@ -43,6 +43,19 @@ describe('solveCfop', () => {
         if (i > 0) expect(move.base, step.text).not.toBe(step.moves[i - 1].base);
       });
     }
+  });
+
+  it('shows every algorithm exactly as on its card; lining up the case is its own top-turn step', () => {
+    for (const { step } of plans.flatMap(listSteps)) {
+      if (!step.algorithmId) continue;
+      const card = CFOP_ALGORITHMS.find((a) => a.id === step.algorithmId)!;
+      expect(formatAlgorithm(step.moves), step.text).toBe(formatAlgorithm(mustParse(card.moves)));
+    }
+    const lineUps = plans
+      .flatMap(listSteps)
+      .filter(({ step }) => step.text.startsWith('Turn the top to line up'));
+    expect(lineUps.length).toBeGreaterThan(0);
+    for (const { step } of lineUps) expect(step.moves.every((m) => m.base === 'U')).toBe(true);
   });
 
   it('names the case for every algorithm step, from the right part of the library', () => {

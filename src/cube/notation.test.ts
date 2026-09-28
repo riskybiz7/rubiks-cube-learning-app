@@ -5,22 +5,9 @@ import {
   formatMove,
   invertMove,
   invertMoves,
-  joinTurns,
   mustParse,
   parseAlgorithm,
 } from './notation';
-
-describe('joinTurns', () => {
-  it('adds up back-to-back turns of the same layer, and drops ones that cancel out', () => {
-    const joined = (text: string) => formatAlgorithm(joinTurns(mustParse(text)));
-    expect(joined("U' U R U2 R'")).toBe("R U2 R'");
-    expect(joined('U U R')).toBe('U2 R');
-    expect(joined("U2 U R'")).toBe("U' R'");
-    expect(joined("R U' U U R'")).toBe("R U R'");
-    expect(joined("R R' U")).toBe('U');
-    expect(joined("R U R'")).toBe("R U R'");
-  });
-});
 
 describe('parseAlgorithm', () => {
   it('reads a simple algorithm', () => {

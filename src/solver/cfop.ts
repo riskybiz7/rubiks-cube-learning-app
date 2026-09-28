@@ -1,7 +1,7 @@
 import { CFOP_ALGORITHMS, CFOP_STAGES, GROUPS, inGroup, type CfopAlgorithm } from '../content/cfop';
 import { COLOR_NAMES, colorList } from '../cube/describe';
 import { applyMoves, isSolved } from '../cube/moves';
-import { joinTurns, mustParse, type Move } from '../cube/notation';
+import { mustParse, type Move } from '../cube/notation';
 import type { Color, Cube } from '../cube/types';
 import { validateStickers } from '../cube/validate';
 import {
@@ -36,15 +36,27 @@ function findCase(
   cube: Cube,
   algorithms: readonly CfopAlgorithm[],
   goal: (cube: Cube) => boolean,
-): { moves: Move[]; algorithm: CfopAlgorithm } | null {
+): Found | null {
   for (const algorithm of algorithms) {
+    const moves = MOVES.get(algorithm.id)!;
     for (const top of TOP_TURNS) {
-      // The top turn that lines up the case may merge with the algorithm's own first turn.
-      const moves = joinTurns([...top, ...MOVES.get(algorithm.id)!]);
-      if (goal(applyMoves(cube, moves))) return { moves, algorithm };
+      if (goal(applyMoves(cube, [...top, ...moves]))) return { top, moves, algorithm };
     }
   }
   return null;
+}
+
+/** A case found: the top turn that lines it up, then the algorithm exactly as on its card. */
+interface Found {
+  top: Move[];
+  moves: Move[];
+  algorithm: CfopAlgorithm;
+}
+
+/** Two steps: turn the top to line up the case (if needed), then the algorithm as learned. */
+function lineUpAndDo(w: PlanWriter, found: Found, lineUp: string, doIt: string): void {
+  w.step('moves', found.top, lineUp);
+  w.step('moves', found.moves, doIt, found.algorithm.id);
 }
 
 // ── Stage 1: the cross ──────────────────────────────────────────────────
@@ -105,27 +117,27 @@ function firstTwoLayers(w: PlanWriter): void {
   for (let guard = 0; guard < 16; guard++) {
     if (isFlippedTwoLayers(w.cube)) return;
     // Try every unfinished slot from the front right, and take the shortest.
-    let best: { quarters: number; moves: Move[]; algorithm: CfopAlgorithm } | null = null;
+    let best: { quarters: number; found: Found; length: number } | null = null;
     for (let quarters = 0; quarters < 4; quarters++) {
       const turned = applyMoves(w.cube, CUBE_TURNS[quarters]);
       if (isPairSolved(turned, FRONT_RIGHT)) continue;
       const found = findCase(turned, F2L, frontRightDone);
-      if (found && (!best || found.moves.length < best.moves.length)) {
-        best = { quarters, ...found };
-      }
+      const length = found ? found.top.length + found.moves.length : Infinity;
+      if (found && (!best || length < best.length)) best = { quarters, found, length };
     }
     if (best) {
       const slot = slotName(applyMoves(w.cube, CUBE_TURNS[best.quarters]));
+      const name = best.found.algorithm.name;
       w.rotate(
         CUBE_TURNS[best.quarters],
         `Turn the whole cube so the ${slot} slot is at the front right.`,
         `The ${slot} slot is already at the front right.`,
       );
-      w.step(
-        'moves',
-        best.moves,
-        `Turn the top to line up the ${slot} corner and edge, then do ${best.algorithm.name} to drop them into the slot together.`,
-        best.algorithm.id,
+      lineUpAndDo(
+        w,
+        best.found,
+        `Turn the top to line up the ${slot} corner and edge for ${name}.`,
+        `Do ${name} to drop the ${slot} corner and edge into the slot together.`,
       );
       continue;
     }
@@ -159,11 +171,12 @@ function lookAndDo(
   if (goal(w.cube)) return;
   const found = findCase(w.cube, inGroup(group), goal);
   if (!found) throw new Error(`Couldn't ${what}.`);
-  w.step(
-    'moves',
-    found.moves,
-    `${what[0].toUpperCase()}${what.slice(1)}: it's the ${found.algorithm.name} case, so turn the top to line it up and do its algorithm.`,
-    found.algorithm.id,
+  const name = found.algorithm.name;
+  lineUpAndDo(
+    w,
+    found,
+    `Turn the top to line up the ${name} case.`,
+    `${what[0].toUpperCase()}${what.slice(1)}: it's the ${name} case, so do its algorithm.`,
   );
 }
 
