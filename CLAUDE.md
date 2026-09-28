@@ -18,7 +18,7 @@ first, and later by free-form camera scanning.
 
 ## Status
 
-**Design approved; no code yet.** The approved design spec is
+**Design approved; phases ① to ③b-1 built.** The approved design spec is
 `docs/superpowers/specs/2026-09-27-cube-learning-app-design.md`, and decisions are
 logged in `docs/decisions-log.md`. Each build phase gets its own implementation plan
 in `docs/superpowers/plans/`, reviewed by the owner before any code is written.
@@ -30,6 +30,11 @@ check-ins; log questions for the owner in the phase ② review notes.
 
 Phase ③a (beginner method: solver, Learn and Solve screens) is built on branch
 `phase-3a-beginner` (stacked on phase ②).
+
+Phase ③b-1 (CFOP solve path: cross, 41 F2L cases, 2-look OLL/PLL, method choice on the
+Solve and Learn screens) is built on branch `phase-3b-cfop` (stacked on ③a). Phase ③b-2
+(full OLL/PLL, Algorithms screen, progress saving) is next. The owner's no-back-turn rule
+applies to the beginner method only; CFOP may turn the back face.
 
 GitHub: private repo `riskybiz7/rubiks-cube-learning-app` (remote `origin`).
 
