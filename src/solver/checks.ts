@@ -1,5 +1,6 @@
-import { isSolved } from '../cube/moves';
-import { CORNER_SLOTS, EDGE_SLOTS, type CornerSlot } from '../cube/pieces';
+import { applyMoves, isSolved } from '../cube/moves';
+import { mustParse } from '../cube/notation';
+import { CORNER_SLOTS, EDGE_SLOTS, type CornerSlot, type EdgeSlot } from '../cube/pieces';
 import { FACES, type Color, type Cube, type Face } from '../cube/types';
 
 /**
@@ -80,3 +81,38 @@ export const areYellowCornersPlaced = (cube: Cube) =>
 
 /** Stage 10: solved. */
 export { isSolved };
+
+// ── CFOP goals (yellow on top, white cross on the bottom) ─────────────────
+
+/** CFOP stage 1: the white cross on the bottom, with yellow on top. */
+export const isCfopCross = (cube: Cube) =>
+  centerColor(cube, 'U') === 'Y' && allSlotsSolved(cube, BOTTOM_EDGES);
+
+/** The four F2L slots as [bottom corner, middle edge]: front-right, front-left, back-left, back-right. */
+export const F2L_PAIRS: readonly (readonly [CornerSlot, EdgeSlot])[] = [0, 1, 2, 3].map(
+  (i) => [BOTTOM_CORNERS[i], MIDDLE_EDGES[i]] as const,
+);
+
+export const isPairSolved = (cube: Cube, pair: readonly [CornerSlot, EdgeSlot]) =>
+  isSlotSolved(cube, pair[0]) && isSlotSolved(cube, pair[1]);
+
+/** CFOP stage 3: the whole top face yellow, with the first two layers done. */
+export const isYellowFace = (cube: Cube) =>
+  isFlippedTwoLayers(cube) && cube.stickers.slice(0, 9).every((color) => color === 'Y');
+
+const TOP_TURN_LIST = ['', 'U', 'U2', "U'"].map(mustParse);
+
+/** The top corners are right relative to each other: one turn of the top lines them all up. */
+export function topCornersMatchAfterTopTurn(cube: Cube): boolean {
+  return (
+    isFlippedTwoLayers(cube) &&
+    TOP_TURN_LIST.some((turn) => {
+      const turned = applyMoves(cube, turn);
+      return TOP_CORNERS.every((slot) =>
+        slot.stickers
+          .slice(1)
+          .every((square) => turned.stickers[square] === centerColor(turned, faceOfSquare(square))),
+      );
+    })
+  );
+}
