@@ -127,10 +127,10 @@ export function SolveScreen(props: SolveScreenProps) {
 
           <div className="controls">
             <button disabled={index === 0} onClick={() => goTo(index - 1)}>
-              â—€ Previous step
+              ◀ Previous step
             </button>
             <button disabled={index >= steps.length - 1} onClick={() => goTo(index + 1)}>
-              Next step â–¶
+              Next step ▶
             </button>
           </div>
           <p className="hint">
