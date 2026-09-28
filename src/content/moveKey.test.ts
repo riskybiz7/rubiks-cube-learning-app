@@ -5,6 +5,7 @@ import { MOVE_BASES, mustParse, type MoveBase } from '../cube/notation';
 import { solveBeginner } from '../solver/beginner';
 import { randomMoves, seededRandom } from '../test-utils/random';
 import { BEGINNER_ALGORITHMS } from './beginner';
+import { CUBE_TURN_WORDS } from './cubeTurnWords';
 import { keyEntries, MOVE_KEY, READING_TIPS, readingTips } from './moveKey';
 
 /** Every move letter the beginner lessons show: the algorithms plus 300 solver plans. */
@@ -25,9 +26,17 @@ function lettersTheBeginnerLessonsUse(): MoveBase[] {
 }
 
 describe('move key: choosing a method', () => {
-  it('the beginner key lists exactly the moves the beginner lessons use', () => {
-    const shown = keyEntries('beginner').map((entry) => entry.base);
-    expect(shown.sort()).toEqual(lettersTheBeginnerLessonsUse());
+  it('the beginner key covers exactly the moves the beginner lessons use', () => {
+    const letters = keyEntries('beginner').map((entry) => entry.base);
+    const words = CUBE_TURN_WORDS.map((word) => word.base);
+    expect([...new Set([...letters, ...words])].sort()).toEqual(lettersTheBeginnerLessonsUse());
+  });
+
+  it('the beginner key explains cube turns in words (SPIN, TIP, ROLL), not x, y, z', () => {
+    const letters = keyEntries('beginner').map((entry) => entry.base);
+    expect(letters).not.toContain('x');
+    expect(letters).not.toContain('y');
+    expect(letters).not.toContain('z');
   });
 
   it('"All moves" shows the whole key', () => {

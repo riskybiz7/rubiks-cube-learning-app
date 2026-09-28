@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { CUBE_TURN_WORDS } from '../content/cubeTurnWords';
+import { formatMove, type MoveBase } from '../cube/notation';
 import {
   KEY_METHODS,
   keyEntries,
@@ -6,6 +8,25 @@ import {
   readingTips,
   type KeyMethod,
 } from '../content/moveKey';
+
+/** On an x, y or z row: what the beginner screens call that turn, e.g. SPIN LEFT (y). */
+function BeginnerWords({ base }: { base: MoveBase }) {
+  const words = CUBE_TURN_WORDS.filter((word) => word.base === base);
+  if (words.length === 0) return null;
+  return (
+    <span className="variants">
+      {' '}
+      Beginner screens say{' '}
+      {words.map((word, i) => (
+        <span key={word.label}>
+          {i > 0 && ', '}
+          {word.label} (<code>{formatMove(word)}</code>)
+        </span>
+      ))}
+      .
+    </span>
+  );
+}
 
 /** The move key: always at the bottom of the page, collapsed until tapped. */
 export function MoveKey() {
@@ -50,6 +71,7 @@ export function MoveKey() {
                         Also <code>{entry.base}'</code> (other way) and <code>{entry.base}2</code>{' '}
                         (twice).
                       </span>
+                      <BeginnerWords base={entry.base} />
                     </td>
                   </tr>
                 ))}
@@ -57,6 +79,24 @@ export function MoveKey() {
           </table>
         </section>
       ))}
+      {method === 'beginner' && (
+        <section>
+          <h3>Turning the whole cube</h3>
+          <p className="hint">These move the whole cube in your hands. No layers turn.</p>
+          <table>
+            <tbody>
+              {CUBE_TURN_WORDS.map((word) => (
+                <tr key={word.label}>
+                  <th scope="row">
+                    <code>{word.label}</code>
+                  </th>
+                  <td>{word.says}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
     </details>
   );
 }

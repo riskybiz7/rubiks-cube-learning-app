@@ -8,10 +8,11 @@ interface CubePlayerProps {
   moves: readonly Move[];
   start: Cube;
   caption?: ReactNode;
+  label?: (move: Move) => string; // how to write each move (standard letters by default)
 }
 
 /** A 3D cube that plays a list of moves from a starting cube, with play/pause/step/speed. */
-export function CubePlayer({ moves, start, caption }: CubePlayerProps) {
+export function CubePlayer({ moves, start, caption, label = formatMove }: CubePlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const playbackRef = useRef<Playback | null>(null);
   const [, refresh] = useReducer((n: number) => n + 1, 0); // re-draw when playback changes
@@ -58,7 +59,7 @@ export function CubePlayer({ moves, start, caption }: CubePlayerProps) {
         <ol className="move-list">
           {moves.map((move, i) => (
             <li key={i} className={i < position ? 'done' : i === position ? 'next' : ''}>
-              {formatMove(move)}
+              {label(move)}
             </li>
           ))}
         </ol>

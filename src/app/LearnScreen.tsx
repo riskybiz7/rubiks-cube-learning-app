@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { BEGINNER_STAGES, algorithmById } from '../content/beginner';
+import { beginnerMoveLabel } from '../content/cubeTurnWords';
 import { demoStage } from '../content/demo';
 import { holdDescription } from '../cube/describe';
 import { CubePlayer } from './CubePlayer';
@@ -60,6 +61,7 @@ export function LearnScreen() {
       <CubePlayer
         moves={demo.moves}
         start={demo.start}
+        label={beginnerMoveLabel}
         caption={
           demo.moves.length > 0
             ? `${holdDescription(demo.start)} This stage took ${demo.moves.length} ${demo.moves.length === 1 ? 'move' : 'moves'} on the example cube.`

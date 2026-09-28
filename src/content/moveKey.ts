@@ -191,11 +191,11 @@ export const KEY_METHODS: readonly { method: KeyMethod; label: string }[] = [
 ];
 
 /**
- * The letters the beginner lessons use: the algorithms' side turns plus the whole-cube
- * turns the Solve screen writes out. A test solves many scrambles to confirm this list
- * matches exactly, so it can't drift from the lessons.
+ * The side-turn letters the beginner lessons use. Whole-cube turns (x, y, z) are shown to
+ * beginners as words instead (SPIN, TIP, ROLL; see cubeTurnWords.ts). A test solves many
+ * scrambles to confirm the two together match the lessons exactly, so they can't drift.
  */
-const BEGINNER_MOVES: readonly MoveBase[] = ['U', 'D', 'R', 'L', 'F', 'x', 'y', 'z'];
+const BEGINNER_MOVES: readonly MoveBase[] = ['U', 'D', 'R', 'L', 'F'];
 
 const WIDE_TURN_TIP = READING_TIPS[3];
 

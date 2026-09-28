@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { BEGINNER_STAGES } from '../content/beginner';
+import { beginnerMoveLabel } from '../content/cubeTurnWords';
 import { holdDescription } from '../cube/describe';
 import { solved } from '../cube/geometry';
 import { applyMoves } from '../cube/moves';
@@ -114,6 +115,7 @@ export function SolveScreen(props: SolveScreenProps) {
           <CubePlayer
             moves={current.step.moves}
             start={current.start}
+            label={beginnerMoveLabel}
             caption={`${holdDescription(current.start)} Copy each turn on your cube.`}
           />
 
