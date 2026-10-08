@@ -12,7 +12,8 @@ import {
   type EditorStickers,
 } from '../input/editorState';
 import { NET_CELLS } from '../input/net';
-import { CubeView, STICKER_HEX } from '../render/CubeView';
+import { cssColor } from '../render/colors';
+import { CubeView } from '../render/CubeView';
 
 const PALETTE: readonly Color[] = ['W', 'Y', 'G', 'B', 'R', 'O'];
 const FACE_NAMES: Record<Face, string> = {
@@ -23,11 +24,6 @@ const FACE_NAMES: Record<Face, string> = {
   L: 'Left',
   R: 'Right',
 };
-
-/** CSS color for a sticker (blank stickers are grey). */
-function cssColor(color: Color | null): string {
-  return color === null ? '#9a9a9a' : `#${STICKER_HEX[color].toString(16).padStart(6, '0')}`;
-}
 
 interface EnterCubeScreenProps {
   stickers: EditorStickers;
