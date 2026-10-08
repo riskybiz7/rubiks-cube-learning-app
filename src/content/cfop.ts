@@ -353,6 +353,27 @@ export const CFOP_STAGES: readonly StageInfo[] = [
       'Two looks. First put the corners in place: two side by side swapped (T-perm) or two diagonal swapped (Y-perm). Then the edges: Ua, Ub, H or Z. Finish by turning the top to line it up.',
     algorithmIds: idsOf('PLL-2LOOK'),
   },
+  {
+    number: 5,
+    title: 'Yellow top in one look (full OLL)',
+    hold: 'Yellow on top.',
+    goal: 'The whole top face yellow, with one algorithm.',
+    howTo:
+      'Instead of two looks, read the whole top at once and do one algorithm: 57 cases. Most people learn a few at a time and use 2-look for the rest. To practise, choose Full for OLL on the Solve screen.',
+    tip: 'Mark cases as learning or learned on the Algorithms screen as you go.',
+    algorithmIds: inSet('OLL').map((a) => a.id),
+    fullSet: true,
+  },
+  {
+    number: 6,
+    title: 'Finish the top in one look (full PLL)',
+    hold: 'Yellow on top.',
+    goal: 'Solved, with one algorithm and a last turn of the top.',
+    howTo:
+      'Read the sides of the top layer and do one algorithm: 21 cases. Start with the ones 2-look already taught you (T, Y, Ua, Ub, H and Z). To practise, choose Full for PLL on the Solve screen.',
+    algorithmIds: inSet('PLL').map((a) => a.id),
+    fullSet: true,
+  },
 ];
 
 /** For each half of the last layer: two looks (fewer algorithms) or one (faster). */
@@ -364,6 +385,9 @@ export interface LastLayerChoice {
 export const TWO_LOOK: LastLayerChoice = { oll: 'two-look', pll: 'two-look' };
 
 /** The four stage titles of a CFOP solve: the matching lesson titles. */
-// Until the full OLL/PLL lessons exist (Task 3), both choices use the 2-look titles.
-export const cfopStageTitles = (_choice: LastLayerChoice): string[] =>
-  CFOP_STAGES.map((s) => s.title);
+export const cfopStageTitles = (choice: LastLayerChoice): string[] => [
+  CFOP_STAGES[0].title,
+  CFOP_STAGES[1].title,
+  CFOP_STAGES[choice.oll === 'full' ? 4 : 2].title,
+  CFOP_STAGES[choice.pll === 'full' ? 5 : 3].title,
+];

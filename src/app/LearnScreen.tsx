@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { findAlgorithm } from '../content/algorithms';
 import { plainMoveLabel } from '../content/cubeTurnWords';
-import { demoStage } from '../content/demo';
+import { demoLesson } from '../content/demo';
 import { STAGES_FOR, type Method } from '../content/methods';
 import { holdDescription } from '../cube/describe';
 import { CubePlayer } from './CubePlayer';
@@ -69,7 +69,7 @@ export function LearnScreen() {
   const [selected, setSelected] = useState(0);
   const stages = STAGES_FOR[method];
   const info = stages[selected];
-  const demo = demoStage(selected, method);
+  const demo = demoLesson(selected, method);
 
   return (
     <>

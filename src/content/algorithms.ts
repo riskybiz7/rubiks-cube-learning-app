@@ -8,6 +8,9 @@ export interface AlgorithmInfo {
   moves: string;
   provenance: Provenance;
   group?: string;
+  number?: number; // OLL 1-57
+  fullGroup?: string; // group in full OLL/PLL, for a shared 2-look card
+  usual?: string; // SpeedCubeDB's standard version, when this card's differs
 }
 
 const ALL: readonly AlgorithmInfo[] = [...Object.values(BEGINNER_ALGORITHMS), ...CFOP_ALGORITHMS];

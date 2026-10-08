@@ -82,6 +82,7 @@ export interface StageInfo {
   howTo: string;
   tip?: string;
   algorithmIds: string[];
+  fullSet?: boolean; // group the cards by their full OLL/PLL group (CFOP lessons 5 and 6)
 }
 
 export const BEGINNER_STAGES: readonly StageInfo[] = [

@@ -20,6 +20,7 @@ import {
   CFOP_STAGES,
   GROUPS,
   cardTitle,
+  cfopStageTitles,
   groupIn,
   inGroup,
   inSet,
@@ -270,11 +271,20 @@ describe('CFOP library: every algorithm', () => {
     for (const a of CFOP_ALGORITHMS) expect(a.provenance, a.id).toBe('claude-proposed');
   });
 
-  // Narrowed until the full OLL/PLL lessons arrive (phase 3b-2 plan, Task 3).
-  it('every CFOP lesson names algorithms that exist, and every F2L/2-look algorithm is in one', () => {
-    expect(CFOP_STAGES.map((s) => s.number)).toEqual([1, 2, 3, 4]);
-    const inLessons = CFOP_STAGES.flatMap((s) => s.algorithmIds);
-    const taught = CFOP_ALGORITHMS.filter((a) => a.set !== 'OLL' && a.set !== 'PLL');
-    expect([...inLessons].sort()).toEqual(taught.map((a) => a.id).sort());
+  it('six CFOP lessons; together they show every algorithm', () => {
+    expect(CFOP_STAGES.map((s) => s.number)).toEqual([1, 2, 3, 4, 5, 6]);
+    const inLessons = new Set(CFOP_STAGES.flatMap((s) => s.algorithmIds));
+    expect([...inLessons].sort()).toEqual(CFOP_ALGORITHMS.map((a) => a.id).sort());
+    expect(CFOP_STAGES[4].algorithmIds).toEqual(inSet('OLL').map((a) => a.id));
+    expect(CFOP_STAGES[5].algorithmIds).toEqual(inSet('PLL').map((a) => a.id));
+  });
+
+  it('stage titles follow the choice', () => {
+    expect(cfopStageTitles({ oll: 'full', pll: 'two-look' })).toEqual([
+      CFOP_STAGES[0].title,
+      CFOP_STAGES[1].title,
+      CFOP_STAGES[4].title,
+      CFOP_STAGES[3].title,
+    ]);
   });
 });

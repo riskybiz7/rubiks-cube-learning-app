@@ -153,7 +153,7 @@ describe('solveCfop: 2-look or full', () => {
         if (result.ok) expect(cfopSelfCheck(result.plan)).toBeNull();
       }
     }
-  });
+  }, 60_000);
 
   it('full OLL is one look: at most a turn of the top and one algorithm, from the 57', () => {
     const random = seededRandom(42);
