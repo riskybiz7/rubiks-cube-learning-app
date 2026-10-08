@@ -1,4 +1,5 @@
 import { describe, it } from 'vitest';
+import { TWO_LOOK } from '../content/cfop';
 import { solved } from '../cube/geometry';
 import { applyMoves } from '../cube/moves';
 import { randomScramble } from '../cube/scramble';
@@ -84,5 +85,43 @@ describe.skipIf(!import.meta.env.VITE_MEASURE)('CFOP measurements', () => {
         `Average ms per solve (includes building the cross tables once): ${msPerSolve.toFixed(1)}`,
       ].join('\n'),
     );
+  }, 600_000);
+
+  it('the same 1,000 solves with full OLL and full PLL (phase 3b-2)', () => {
+    const random = seededRandom(99);
+    const scrambles = Array.from({ length: 1000 }, () => randomScramble(25, random));
+    const lines: string[] = [];
+    for (const choice of [TWO_LOOK, { oll: 'full', pll: 'full' } as const]) {
+      const turns: number[] = [];
+      const steps: number[] = [];
+      const lastLayerTurns: number[] = [];
+      let noOll = 0;
+      let noPll = 0;
+      const started = performance.now();
+      for (const scramble of scrambles) {
+        const result = solveCfop(applyMoves(solved(), scramble), choice);
+        if (!result.ok) throw new Error(result.error);
+        const all = listSteps(result.plan);
+        const layer = (s: (typeof all)[number]) =>
+          s.step.moves.filter((m) => !ROTATIONS.has(m.base));
+        turns.push(all.flatMap(layer).length);
+        steps.push(all.length);
+        lastLayerTurns.push(all.filter((s) => s.stage.number >= 3).flatMap(layer).length);
+        const usesAlgorithm = (stage: number) =>
+          all.some((s) => s.stage.number === stage && s.step.algorithmId);
+        if (!usesAlgorithm(3)) noOll++;
+        if (!usesAlgorithm(4)) noPll++;
+      }
+      const ms = (performance.now() - started) / scrambles.length;
+      lines.push(
+        `[OLL ${choice.oll}, PLL ${choice.pll}]`,
+        `  Layer turns for the whole solve: ${spread(turns)}`,
+        `  Layer turns for the last layer (stages 3-4): ${spread(lastLayerTurns)}`,
+        `  Steps on the Solve screen: ${spread(steps)}`,
+        `  Solves needing no OLL algorithm: ${noOll}; no PLL algorithm: ${noPll}`,
+        `  Average ms per solve: ${ms.toFixed(1)}`,
+      );
+    }
+    console.log(lines.join('\n'));
   }, 600_000);
 });

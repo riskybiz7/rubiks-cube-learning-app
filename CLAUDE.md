@@ -18,7 +18,7 @@ first, and later by free-form camera scanning.
 
 ## Status
 
-**Design approved; phases ① to ③b-1 built and merged into `main`.** The approved design
+**Design approved; phases ① to ③b-1 merged into `main`; ③b-2 built.** The approved design
 spec is `docs/superpowers/specs/2026-09-27-cube-learning-app-design.md`, and decisions are
 logged in `docs/decisions-log.md`. Each build phase gets its own implementation plan
 in `docs/superpowers/plans/`, reviewed by the owner before any code is written.
@@ -32,9 +32,12 @@ Merged into `main` (PRs #1 to #4, 2026-10-08):
 - Phase ③b-1: CFOP solve path (cross, 41 F2L cases, 2-look OLL/PLL, method choice on
   the Solve and Learn screens).
 
-Phase ③b-2 (full OLL/PLL, Algorithms screen, progress saving) is next. Branch new phases
-off `main`; GitHub deletes a branch automatically once its PR is merged. The owner's
-no-back-turn rule applies to the beginner method only; CFOP may turn the back face.
+Phase ③b-2 (full OLL 57 / PLL 21 tied to SpeedCubeDB's numbering, 2-look/full choice,
+Algorithms screen with case diagrams, progress saved in the browser) is built on branch
+`phase-3b2-algorithms`; see `docs/phase-3b2-review-notes.md`. Phase ④ (camera scanning) is
+next. Branch new phases off `main`; GitHub deletes a branch automatically once its PR is
+merged. The owner's no-back-turn rule applies to the beginner method only; CFOP may turn
+the back face.
 
 GitHub: private repo `riskybiz7/rubiks-cube-learning-app` (remote `origin`).
 

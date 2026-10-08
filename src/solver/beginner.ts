@@ -29,6 +29,7 @@ import {
   CUBE_TURNS,
   PlanWriter,
   TOP_TURNS,
+  alreadySolvedPlan,
   checkPlan,
   quarterTurns,
   reorientTo,
@@ -52,6 +53,12 @@ const BOTTOM_TURNS = quarterTurns('D');
 const name = (color: Color) => COLOR_NAMES[color];
 
 // ── Stage 1: the daisy ──────────────────────────────────────────────────
+
+export const CROSS_ALREADY_MADE =
+  'Your white cross is already made, so skip the daisy: it would only take the cross apart.';
+
+/** The white cross is already made (held any way up): the daisy and cross stages have nothing to do. */
+const whiteCrossMade = (cube: Cube) => isWhiteCross(applyMoves(cube, reorientTo(cube, 'W', 'G')));
 
 /** The other colors of the white edges that are currently petals. */
 function petalColors(cube: Cube): Color[] {
@@ -110,6 +117,10 @@ function withoutBackFace(w: PlanWriter, moves: readonly Move[]): Move[] {
 
 function daisy(w: PlanWriter): void {
   w.startStage(1);
+  if (whiteCrossMade(w.cube)) {
+    w.step('check', [], CROSS_ALREADY_MADE);
+    return;
+  }
   w.rotate(
     reorientTo(w.cube, 'Y', 'G'),
     'Turn the cube so yellow is on top.',
@@ -134,7 +145,8 @@ function daisy(w: PlanWriter): void {
 
 function whiteCross(w: PlanWriter): void {
   w.startStage(2);
-  for (let petal = 0; petal < 4; petal++) {
+  // With the cross already made there are no petals: just hold it white side up.
+  for (let petal = 0; petal < 4 && !whiteCrossMade(w.cube); petal++) {
     let choice: { k: number; face: Face } | null = null;
     for (let k = 0; k < 4 && !choice; k++) {
       const turned = applyMoves(w.cube, TOP_TURNS[k]);
@@ -503,7 +515,7 @@ function twistCorners(w: PlanWriter): void {
 // ── Putting it together ─────────────────────────────────────────────────
 
 const STAGE_GOALS: ((cube: Cube) => boolean)[] = [
-  isDaisy,
+  (cube) => isDaisy(cube) || whiteCrossMade(cube), // a cross already made skips the daisy
   isWhiteCross,
   isFirstLayer,
   isFirstTwoLayers,
@@ -524,11 +536,10 @@ export function selfCheck(plan: SolvePlan): string | null {
 export function solveBeginner(start: Cube): SolveResult {
   const check = validateStickers(start.stickers);
   if (!check.ok) return { ok: false, error: check.problems.map((p) => p.message).join(' ') };
+  const titles = BEGINNER_STAGES.map((s) => s.title);
+  if (isSolved(start)) return { ok: true, plan: alreadySolvedPlan(start, titles) };
   try {
-    const w = new PlanWriter(
-      start,
-      BEGINNER_STAGES.map((s) => s.title),
-    );
+    const w = new PlanWriter(start, titles);
     daisy(w);
     whiteCross(w);
     whiteCorners(w);

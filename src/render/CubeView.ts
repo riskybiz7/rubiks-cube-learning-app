@@ -2,21 +2,9 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { Move } from '../cube/notation';
 import type { Color, Cube } from '../cube/types';
+import { BLANK_HEX, STICKER_HEX } from './colors';
 import { CUBIES, moveRotation } from './layout';
 import type { CubeDisplay } from './playback';
-
-/** Screen colors for each sticker color. */
-export const STICKER_HEX: Record<Color, number> = {
-  W: 0xffffff,
-  Y: 0xffd500,
-  G: 0x009b48,
-  B: 0x0046ad,
-  R: 0xb71234,
-  O: 0xff5800,
-};
-
-/** Screen color for a sticker that hasn't been filled in yet. */
-const BLANK_HEX = 0x9a9a9a;
 
 interface ActiveAnimation {
   pivot: THREE.Group;

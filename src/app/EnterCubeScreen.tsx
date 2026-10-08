@@ -12,7 +12,8 @@ import {
   type EditorStickers,
 } from '../input/editorState';
 import { NET_CELLS } from '../input/net';
-import { CubeView, STICKER_HEX } from '../render/CubeView';
+import { cssColor } from '../render/colors';
+import { CubeView } from '../render/CubeView';
 
 const PALETTE: readonly Color[] = ['W', 'Y', 'G', 'B', 'R', 'O'];
 const FACE_NAMES: Record<Face, string> = {
@@ -24,20 +25,16 @@ const FACE_NAMES: Record<Face, string> = {
   R: 'Right',
 };
 
-/** CSS color for a sticker (blank stickers are grey). */
-function cssColor(color: Color | null): string {
-  return color === null ? '#9a9a9a' : `#${STICKER_HEX[color].toString(16).padStart(6, '0')}`;
-}
-
 interface EnterCubeScreenProps {
   stickers: EditorStickers;
   onStickersChange: (stickers: EditorStickers) => void;
   onUseCube: (cube: Cube) => void;
   onSolveCube: (cube: Cube) => void;
+  onCubeChecked: (cube: Cube) => void; // a cube that passed "Check my cube" counts as entered
 }
 
 export function EnterCubeScreen(props: EnterCubeScreenProps) {
-  const { stickers, onStickersChange, onUseCube, onSolveCube } = props;
+  const { stickers, onStickersChange, onUseCube, onSolveCube, onCubeChecked } = props;
   const [color, setColor] = useState<Color>('W');
   const [result, setResult] = useState<ValidationResult | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -140,7 +137,15 @@ export function EnterCubeScreen(props: EnterCubeScreenProps) {
       </div>
 
       <div className="controls">
-        <button onClick={() => setResult(validateStickers(stickers))}>✔ Check my cube</button>
+        <button
+          onClick={() => {
+            const checked = validateStickers(stickers);
+            setResult(checked);
+            if (checked.ok) onCubeChecked(checked.cube);
+          }}
+        >
+          ✔ Check my cube
+        </button>
         <button onClick={() => change(blankStickers())}>Start over</button>
         <button onClick={() => change(solvedStickers())}>Fill as solved</button>
       </div>

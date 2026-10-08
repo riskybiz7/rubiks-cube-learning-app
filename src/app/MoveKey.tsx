@@ -28,9 +28,14 @@ function LessonWords({ base }: { base: MoveBase }) {
   );
 }
 
-/** The move key: always at the bottom of the page, collapsed until tapped. */
-export function MoveKey() {
-  const [method, setMethod] = useState<KeyMethod>('beginner');
+/**
+ * The move key: always at the bottom of the page, collapsed until tapped. It follows the
+ * method in use (chosen by App); "Show all moves" adds every other letter.
+ */
+export function MoveKey({ method: following }: { method: KeyMethod }) {
+  const [showAll, setShowAll] = useState(false);
+  const method: KeyMethod = showAll ? 'all' : following;
+  const label = KEY_METHODS.find((option) => option.method === following)!.label;
   const entries = keyEntries(method);
   // Only groups with at least one move for this method (e.g. no wide turns for beginners).
   const groups = MOVE_GROUPS.filter((group) => entries.some((entry) => entry.group === group));
@@ -38,16 +43,21 @@ export function MoveKey() {
   return (
     <details className="move-key">
       <summary>Move key: what R, U', F2 and the other letters mean</summary>
-      <label className="key-method">
-        Show moves for:{' '}
-        <select value={method} onChange={(event) => setMethod(event.target.value as KeyMethod)}>
-          {KEY_METHODS.map((option) => (
-            <option key={option.method} value={option.method}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      {following === 'all' ? (
+        <p className="key-method">Showing every move: the algorithm player takes any notation.</p>
+      ) : (
+        <p className="key-method">
+          Showing the moves for: <strong>{label}</strong>.{' '}
+          <label>
+            <input
+              type="checkbox"
+              checked={showAll}
+              onChange={(event) => setShowAll(event.target.checked)}
+            />{' '}
+            Show all moves
+          </label>
+        </p>
+      )}
       <ul className="reading-tips">
         {readingTips(method).map((tip) => (
           <li key={tip}>{tip}</li>

@@ -1,22 +1,25 @@
 import { useMemo } from 'react';
+import type { LastLayerChoice, LookChoice } from '../content/cfop';
+import { TWO_LOOK_VS_FULL } from '../content/cfopTerms';
 import { plainMoveLabel } from '../content/cubeTurnWords';
-import { STAGES_FOR, solveWith, type Method } from '../content/methods';
+import { solveWith } from '../content/methods';
 import { holdDescription } from '../cube/describe';
 import { solved } from '../cube/geometry';
 import { applyMoves } from '../cube/moves';
 import { formatAlgorithm, type Move } from '../cube/notation';
 import type { Cube } from '../cube/types';
 import { listSteps } from '../solver/plan';
+import { AlgorithmCard } from './AlgorithmCard';
 import { CubePlayer } from './CubePlayer';
-import { AlgorithmCard } from './LearnScreen';
+import { indexAfterChoiceChange } from './lastLayer';
 import { MethodButtons } from './MethodButtons';
+import { withLastLayer, withMethod, type Progress } from './progress';
 
 /**
  * Everything about the current solve that must survive switching tabs. It lives in App
  * (not in this screen), because a screen is removed when another tab is showing.
  */
 export interface SolveState {
-  method: Method; // Beginner or CFOP
   useEntered: boolean; // solving the entered cube (true) or a random scramble (false)
   scramble: readonly Move[];
   index: number; // which step the user is on
@@ -28,28 +31,97 @@ interface SolveScreenProps {
   onStateChange: (state: SolveState) => void;
   onNewScramble: () => void;
   onEnterCube: () => void;
+  progress: Progress; // holds the method and the 2-look/full choice, remembered in this browser
+  onProgressChange: (progress: Progress) => void;
+}
+
+const LOOKS: readonly { look: LookChoice; label: string }[] = [
+  { look: 'two-look', label: '2-look' },
+  { look: 'full', label: 'Full' },
+];
+
+/** A row of buttons choosing 2-look or full for one half of the last layer. */
+function LookButtons(props: {
+  name: string;
+  look: LookChoice;
+  onChange: (look: LookChoice) => void;
+}) {
+  return (
+    <div className="controls look-choice" role="group" aria-label={`${props.name}: 2-look or full`}>
+      <span>{props.name}:</span>
+      {LOOKS.map(({ look, label }) => (
+        <button
+          key={look}
+          className={props.look === look ? 'active' : ''}
+          aria-pressed={props.look === look}
+          onClick={() => props.onChange(look)}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 export function SolveScreen(props: SolveScreenProps) {
   const { enteredCube, state, onStateChange, onNewScramble, onEnterCube } = props;
+  const { progress, onProgressChange } = props;
+  const choice = progress.lastLayer;
+  const method = progress.method; // shared with the Learn screen and the move key
   const useEntered = state.useEntered && enteredCube !== null;
   const start = useMemo(
     () => (useEntered && enteredCube ? enteredCube : applyMoves(solved(), state.scramble)),
     [useEntered, enteredCube, state.scramble],
   );
-  const result = useMemo(() => solveWith(state.method, start), [state.method, start]);
+  const result = useMemo(() => solveWith(method, start, choice), [method, start, choice]);
   const steps = useMemo(() => (result.ok ? listSteps(result.plan) : []), [result]);
   const index = Math.min(state.index, steps.length - 1);
   const current = steps[index];
   const goTo = (next: number) => onStateChange({ ...state, index: next });
 
+  /** Switch 2-look/full, keeping your place where the steps don't change (decision 44). */
+  const changeChoice = (next: LastLayerChoice) => {
+    const after = solveWith(method, start, next);
+    const nextSteps = after.ok ? listSteps(after.plan) : [];
+    onProgressChange(withLastLayer(progress, next));
+    onStateChange({ ...state, index: indexAfterChoiceChange(steps, nextSteps, index) });
+  };
+
   return (
     <>
       <h1>Solve my cube</h1>
       <MethodButtons
-        method={state.method}
-        onChange={(method) => onStateChange({ ...state, method, index: 0 })}
+        method={method}
+        onChange={(next) => {
+          onProgressChange(withMethod(progress, next));
+          onStateChange({ ...state, index: 0 });
+        }}
       />
+      {method === 'cfop' && (
+        <>
+          <LookButtons
+            name="OLL (yellow top)"
+            look={choice.oll}
+            onChange={(oll) => changeChoice({ ...choice, oll })}
+          />
+          <LookButtons
+            name="PLL (finish the top)"
+            look={choice.pll}
+            onChange={(pll) => changeChoice({ ...choice, pll })}
+          />
+          <details className="help">
+            <summary>2-look or Full: what's the difference?</summary>
+            <p>
+              <strong>OLL</strong> (Orient the Last Layer) makes the whole top yellow.{' '}
+              <strong>PLL</strong> (Permute the Last Layer) then moves the top pieces to their
+              places and finishes the cube.
+            </p>
+            <p>{TWO_LOOK_VS_FULL.twoLook}</p>
+            <p>{TWO_LOOK_VS_FULL.full}</p>
+            <p className="hint">{TWO_LOOK_VS_FULL.advice}</p>
+          </details>
+        </>
+      )}
       <div className="controls">
         <button
           className={useEntered ? 'active' : ''}
@@ -88,10 +160,10 @@ export function SolveScreen(props: SolveScreenProps) {
         </p>
       )}
 
-      {current && (
+      {current && result.ok && (
         <>
           <ol className="stage-list">
-            {STAGES_FOR[state.method].map((stage, i) => (
+            {result.plan.stages.map((stage, i) => (
               <li key={stage.number} className={i === current.stageIndex ? 'current' : ''}>
                 <button
                   onClick={() => {

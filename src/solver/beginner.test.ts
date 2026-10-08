@@ -8,6 +8,8 @@ import type { Cube } from '../cube/types';
 import { randomMoves, seededRandom } from '../test-utils/random';
 import { centerColor, isCornerInPlace, isSlotSolved, TOP_CORNERS, TOP_EDGES } from './checks';
 import { listSteps, selfCheck, solveBeginner, type SolvePlan } from './beginner';
+import { CROSS_ALREADY_MADE } from './beginner';
+import { ALREADY_SOLVED } from './plan';
 
 function mustSolve(cube: Cube): SolvePlan {
   const result = solveBeginner(cube);
@@ -193,6 +195,38 @@ describe('solveBeginner: white cross the way the owner does it', () => {
         // The step before says which center faces you (turned there, or already there).
         expect(i > 0 && cross[i - 1].text.includes('faces you'), where).toBe(true);
       });
+    }
+  });
+});
+
+describe('solveBeginner: skips work that is already done (owner, 2026-10-08)', () => {
+  const HOLDS = ['', 'y', 'x2', "z'", 'x2 y', 'x'];
+  const layerMoves = (plan: SolvePlan, stage?: number) =>
+    plan.stages
+      .filter((s) => stage === undefined || s.number === stage)
+      .flatMap((s) => s.steps.flatMap((step) => step.moves));
+
+  it('a solved cube, held any way: no moves at all, and it says so', () => {
+    for (const hold of HOLDS) {
+      const plan = mustSolve(applyMoves(solved(), mustParse(hold)));
+      expect(layerMoves(plan), hold).toEqual([]);
+      expect(plan.stages[0].steps).toEqual([{ kind: 'check', moves: [], text: ALREADY_SOLVED }]);
+      expect(selfCheck(plan)).toBeNull();
+    }
+  });
+
+  it('a white cross already made: no daisy, and the cross stage only turns the cube', () => {
+    // Corner and middle-layer moves that leave the white cross (on top) in place.
+    const crossKept = "R' D' R D L D L' D' F' D2 F D2 B D B' D";
+    for (const hold of HOLDS) {
+      const start = applyMoves(solved(), mustParse(`${crossKept} ${hold}`));
+      expect(isSolved(start)).toBe(false);
+      const plan = mustSolve(start);
+      expect(layerMoves(plan, 1), hold).toEqual([]);
+      expect(plan.stages[0].steps[0].text).toBe(CROSS_ALREADY_MADE);
+      const crossTurns = layerMoves(plan, 2).filter((m) => !'xyz'.includes(m.base));
+      expect(crossTurns, hold).toEqual([]);
+      expect(selfCheck(plan)).toBeNull();
     }
   });
 });

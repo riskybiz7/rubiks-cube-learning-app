@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { CFOP_ALGORITHMS } from '../content/cfop';
+import { DEMO_SCRAMBLE } from '../content/beginner';
+import {
+  CFOP_ALGORITHMS,
+  TWO_LOOK,
+  caseCube,
+  cfopStageTitles,
+  inSet,
+  type LastLayerChoice,
+} from '../content/cfop';
 import { solved } from '../cube/geometry';
 import { applyMoves } from '../cube/moves';
 import { formatAlgorithm, mustParse } from '../cube/notation';
@@ -10,7 +18,7 @@ import { randomMoves, seededRandom } from '../test-utils/random';
 import { centerColor } from './checks';
 import { cfopSelfCheck, solveCfop } from './cfop';
 import { crossMoves } from './cross';
-import { listSteps, reorientTo, type SolvePlan } from './plan';
+import { ALREADY_DONE, ALREADY_SOLVED, listSteps, reorientTo, type SolvePlan } from './plan';
 
 function mustSolve(cube: Cube): SolvePlan {
   const result = solveCfop(cube);
@@ -124,5 +132,90 @@ describe('solveCfop', () => {
     expect(listSteps(plan).some(({ step }) => step.text.startsWith('Take its pieces out'))).toBe(
       true,
     );
+  });
+});
+
+const CHOICES: LastLayerChoice[] = [
+  { oll: 'two-look', pll: 'two-look' },
+  { oll: 'full', pll: 'two-look' },
+  { oll: 'two-look', pll: 'full' },
+  { oll: 'full', pll: 'full' },
+];
+
+describe('solveCfop: 2-look or full', () => {
+  it('solves 200 scrambles with every choice, and passes its own check', () => {
+    const random = seededRandom(41);
+    for (let n = 0; n < 200; n++) {
+      const start = applyMoves(solved(), randomMoves(25, random));
+      for (const choice of CHOICES) {
+        const result = solveCfop(start, choice);
+        expect(result.ok, `${n} ${choice.oll}/${choice.pll}`).toBe(true);
+        if (result.ok) expect(cfopSelfCheck(result.plan)).toBeNull();
+      }
+    }
+  }, 60_000);
+
+  it('full OLL is one look: at most a turn of the top and one algorithm, from the 57', () => {
+    const random = seededRandom(42);
+    const full = new Set(inSet('OLL').map((a) => a.id));
+    for (let n = 0; n < 100; n++) {
+      const result = solveCfop(applyMoves(solved(), randomMoves(25, random)), {
+        oll: 'full',
+        pll: 'two-look',
+      });
+      if (!result.ok) throw new Error(result.error);
+      const stage = result.plan.stages[2];
+      expect(stage.steps.length).toBeLessThanOrEqual(2);
+      for (const step of stage.steps)
+        if (step.algorithmId) expect(full.has(step.algorithmId)).toBe(true);
+    }
+  });
+
+  it('full PLL is one look: a turn, one algorithm from the 21, and a final turn at most', () => {
+    const random = seededRandom(43);
+    const full = new Set(inSet('PLL').map((a) => a.id));
+    for (let n = 0; n < 100; n++) {
+      const result = solveCfop(applyMoves(solved(), randomMoves(25, random)), {
+        oll: 'two-look',
+        pll: 'full',
+      });
+      if (!result.ok) throw new Error(result.error);
+      const stage = result.plan.stages[3];
+      expect(stage.steps.length).toBeLessThanOrEqual(3);
+      for (const step of stage.steps)
+        if (step.algorithmId) expect(full.has(step.algorithmId)).toBe(true);
+    }
+  });
+
+  it('a top already yellow with full OLL: the stage says so and turns nothing', () => {
+    // The T-perm case (top all yellow, pieces out of place), held upside down.
+    const start = applyMoves(caseCube("R U R' U' R' F R2 U' R' U' R U R' F'"), mustParse('x2 y'));
+    const result = solveCfop(start, { oll: 'full', pll: 'full' });
+    if (!result.ok) throw new Error(result.error);
+    expect(result.plan.stages[2].steps).toEqual([{ kind: 'check', moves: [], text: ALREADY_DONE }]);
+  });
+
+  it('names the stages for the choice', () => {
+    const choice: LastLayerChoice = { oll: 'full', pll: 'two-look' };
+    const result = solveCfop(applyMoves(solved(), mustParse(DEMO_SCRAMBLE)), choice);
+    if (!result.ok) throw new Error(result.error);
+    expect(result.plan.stages.map((s) => s.title)).toEqual(cfopStageTitles(choice));
+  });
+
+  it('2-look stays the default', () => {
+    const start = applyMoves(solved(), mustParse(DEMO_SCRAMBLE));
+    expect(solveCfop(start)).toEqual(solveCfop(start, TWO_LOOK));
+  });
+});
+
+describe('solveCfop: a solved cube (owner, 2026-10-08)', () => {
+  it('held any way: no moves at all, and it says so', () => {
+    for (const hold of ['', 'z2', 'y', "x'"]) {
+      const result = solveCfop(applyMoves(solved(), mustParse(hold)), { oll: 'full', pll: 'full' });
+      if (!result.ok) throw new Error(result.error);
+      expect(result.plan.stages.flatMap((s) => s.steps.flatMap((step) => step.moves))).toEqual([]);
+      expect(result.plan.stages[0].steps[0].text).toBe(ALREADY_SOLVED);
+      expect(cfopSelfCheck(result.plan)).toBeNull();
+    }
   });
 });
