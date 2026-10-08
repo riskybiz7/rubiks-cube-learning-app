@@ -18,12 +18,12 @@ first, and later by free-form camera scanning.
 
 ## Status
 
-**Design approved; phases ① to ③b-1 merged into `main`; ③b-2 built.** The approved design
+**Design approved; phases ① to ③b-2 built and merged into `main`.** The approved design
 spec is `docs/superpowers/specs/2026-09-27-cube-learning-app-design.md`, and decisions are
 logged in `docs/decisions-log.md`. Each build phase gets its own implementation plan
 in `docs/superpowers/plans/`, reviewed by the owner before any code is written.
 
-Merged into `main` (PRs #1 to #4, 2026-10-08):
+Merged into `main` (PRs #1 to #5, 2026-10-08):
 
 - Phase ①: cube model + 3D algorithm player.
 - Phase ②: manual sticker entry + validation, including the pieces view and
@@ -31,11 +31,13 @@ Merged into `main` (PRs #1 to #4, 2026-10-08):
 - Phase ③a: beginner method (solver, Learn and Solve screens).
 - Phase ③b-1: CFOP solve path (cross, 41 F2L cases, 2-look OLL/PLL, method choice on
   the Solve and Learn screens).
+- Phase ③b-2: full OLL 57 / PLL 21 tied to SpeedCubeDB's numbering, 2-look/full choice,
+  Algorithms screen with case diagrams (follows the chosen method), progress saved in the
+  browser, plus the owner's feedback (decisions #45–#49; see
+  `docs/phase-3b2-review-notes.md`).
 
-Phase ③b-2 (full OLL 57 / PLL 21 tied to SpeedCubeDB's numbering, 2-look/full choice,
-Algorithms screen with case diagrams, progress saved in the browser) is built on branch
-`phase-3b2-algorithms`; see `docs/phase-3b2-review-notes.md`. Phase ④ (camera scanning) is
-next. Branch new phases off `main`; GitHub deletes a branch automatically once its PR is
+Phase ④ (camera scanning) is next. Its plan starts with the owner's choice between local
+HTTPS and putting the app online (spec §10/§11). Branch new phases off `main`; GitHub deletes a branch automatically once its PR is
 merged. The owner's no-back-turn rule applies to the beginner method only; CFOP may turn
 the back face.
 
