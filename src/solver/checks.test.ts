@@ -12,7 +12,45 @@ import {
   isFlippedTwoLayers,
   isWhiteCross,
   isYellowCross,
+  F2L_PAIRS,
+  isCfopCross,
+  isPairSolved,
+  isYellowFace,
+  topCornersMatchAfterTopTurn,
 } from './checks';
+
+const CFOP_HOME = applyMoves(solved(), mustParse('z2')); // yellow on top, green facing you
+
+describe('CFOP goals', () => {
+  it('the cross is the four white edges on the bottom, with yellow on top', () => {
+    expect(isCfopCross(CFOP_HOME)).toBe(true);
+    expect(isCfopCross(applyMoves(CFOP_HOME, mustParse('R')))).toBe(false);
+    expect(isCfopCross(solved())).toBe(false); // white on top: not the CFOP hold
+  });
+
+  it('pairs are the bottom corner and the middle edge of each slot', () => {
+    expect(F2L_PAIRS.map(([corner, edge]) => `${corner.name}+${edge.name}`)).toEqual([
+      'DFR+FR',
+      'DLF+FL',
+      'DBL+BL',
+      'DRB+BR',
+    ]);
+    const afterR = applyMoves(CFOP_HOME, mustParse('R'));
+    expect(isPairSolved(afterR, F2L_PAIRS[0])).toBe(false);
+    expect(isPairSolved(afterR, F2L_PAIRS[1])).toBe(true);
+  });
+
+  it('the yellow face is the whole top yellow, with the first two layers done', () => {
+    expect(isYellowFace(CFOP_HOME)).toBe(true);
+    expect(isYellowFace(applyMoves(CFOP_HOME, mustParse("R U R' U R U2 R'")))).toBe(false);
+  });
+
+  it('top corners "match after a top turn" when one turn of the top would line them all up', () => {
+    expect(topCornersMatchAfterTopTurn(applyMoves(CFOP_HOME, mustParse('U')))).toBe(true);
+    const tPerm = mustParse("R U R' U' R' F R2 U' R' U' R U R' F'");
+    expect(topCornersMatchAfterTopTurn(applyMoves(CFOP_HOME, tPerm))).toBe(false);
+  });
+});
 
 const apply = (cube: Cube, text: string) => applyMoves(cube, mustParse(text));
 

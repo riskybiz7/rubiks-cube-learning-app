@@ -182,26 +182,30 @@ export const MOVE_KEY: readonly MoveKeyEntry[] = [
   },
 ];
 
-/** Which moves the key shows. CFOP joins this list in phase 3b. */
-export type KeyMethod = 'beginner' | 'all';
+/** Which moves the key shows. */
+export type KeyMethod = 'beginner' | 'cfop' | 'all';
 
 export const KEY_METHODS: readonly { method: KeyMethod; label: string }[] = [
   { method: 'beginner', label: 'Beginner (daisy) method' },
+  { method: 'cfop', label: 'CFOP' },
   { method: 'all', label: 'All moves' },
 ];
 
 /**
- * The side-turn letters the beginner lessons use. Whole-cube turns (x, y, z) are shown to
- * beginners as words instead (SPIN, TIP, ROLL; see cubeTurnWords.ts). A test solves many
- * scrambles to confirm the two together match the lessons exactly, so they can't drift.
+ * The side-turn letters each method's lessons use. Whole-cube turns (x, y, z) are shown
+ * on lesson screens as words instead (SPIN, TIP, ROLL; see cubeTurnWords.ts). Tests solve
+ * many scrambles to confirm these lists match the lessons exactly, so they can't drift.
+ * CFOP adds the back face: the owner's no-back-turn rule is for beginners only.
  */
 const BEGINNER_MOVES: readonly MoveBase[] = ['U', 'D', 'R', 'L', 'F'];
+const CFOP_MOVES: readonly MoveBase[] = ['U', 'D', 'R', 'L', 'F', 'B'];
 
 const WIDE_TURN_TIP = READING_TIPS[3];
 
 export function keyEntries(method: KeyMethod): readonly MoveKeyEntry[] {
   if (method === 'all') return MOVE_KEY;
-  return MOVE_KEY.filter((entry) => BEGINNER_MOVES.includes(entry.base));
+  const letters = method === 'cfop' ? CFOP_MOVES : BEGINNER_MOVES;
+  return MOVE_KEY.filter((entry) => letters.includes(entry.base));
 }
 
 export function readingTips(method: KeyMethod): readonly string[] {

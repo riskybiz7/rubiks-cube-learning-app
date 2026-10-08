@@ -1,12 +1,5 @@
 import { BEGINNER_ALGORITHMS, BEGINNER_STAGES } from '../content/beginner';
-import {
-  COLOR_NAMES,
-  colorList,
-  faceWord,
-  holdDescription,
-  listJoin,
-  placeName,
-} from '../cube/describe';
+import { COLOR_NAMES, colorList, faceWord, listJoin, placeName } from '../cube/describe';
 import { applyMoves, isSolved } from '../cube/moves';
 import { mustParse, type Move, type MoveBase, type Turns } from '../cube/notation';
 import { CORNER_SLOTS, EDGE_SLOTS } from '../cube/pieces';
@@ -32,27 +25,20 @@ import {
   isWhiteCross,
   isYellowCross,
 } from './checks';
+import {
+  CUBE_TURNS,
+  PlanWriter,
+  TOP_TURNS,
+  checkPlan,
+  quarterTurns,
+  reorientTo,
+  type SolvePlan,
+  type SolveResult,
+} from './plan';
 import { searchMoves } from './search';
 
-export interface SolveStep {
-  kind: 'moves' | 'rotate' | 'check'; // turn layers / turn the whole cube / just look
-  moves: readonly Move[];
-  text: string;
-  algorithmId?: string;
-}
-
-export interface SolveStage {
-  number: number;
-  title: string;
-  steps: SolveStep[];
-}
-
-export interface SolvePlan {
-  start: Cube;
-  stages: SolveStage[];
-}
-
-export type SolveResult = { ok: true; plan: SolvePlan } | { ok: false; error: string };
+export type { PlannedStep, SolvePlan, SolveResult, SolveStage, SolveStep } from './plan';
+export { listSteps } from './plan';
 
 // ── Small helpers ───────────────────────────────────────────────────────
 
@@ -62,77 +48,8 @@ const algorithm = (key: keyof typeof BEGINNER_ALGORITHMS): Move[] =>
 const repeat = (moves: readonly Move[], times: number): Move[] =>
   Array.from({ length: times }, () => moves).flat();
 
-/** Turning a layer (or the whole cube) 0, 1, 2 or 3 quarter turns. */
-const quarterTurns = (base: MoveBase): Move[][] => [
-  [],
-  [{ base, turns: 1 }],
-  [{ base, turns: 2 }],
-  [{ base, turns: 3 as Turns }],
-];
-const TOP_TURNS = quarterTurns('U');
 const BOTTOM_TURNS = quarterTurns('D');
-const CUBE_TURNS = quarterTurns('y'); // turn the whole cube, keeping the same face on top
-
-/** Every way to reorient the whole cube, shortest first. */
-const REORIENTATIONS: Move[][] = [
-  '',
-  'x',
-  "x'",
-  'x2',
-  'y',
-  "y'",
-  'y2',
-  'z',
-  "z'",
-  'z2',
-  ...['x', "x'", 'x2', 'z', "z'"].flatMap((a) => ['y', "y'", 'y2'].map((b) => `${a} ${b}`)),
-].map(mustParse);
-
-const lowerFirst = (text: string) => text[0].toLowerCase() + text.slice(1);
 const name = (color: Color) => COLOR_NAMES[color];
-
-/** Collects stages and steps, keeping track of the cube after each step. */
-class PlanWriter {
-  cube: Cube;
-  readonly stages: SolveStage[] = [];
-
-  constructor(start: Cube) {
-    this.cube = start;
-  }
-
-  startStage(number: number): void {
-    this.stages.push({ number, title: BEGINNER_STAGES[number - 1].title, steps: [] });
-  }
-
-  /** Add a step (steps that would turn nothing are skipped, except "look" steps). */
-  step(kind: SolveStep['kind'], moves: readonly Move[], text: string, algorithmId?: string): void {
-    if (kind !== 'check' && moves.length === 0) return;
-    this.stages[this.stages.length - 1].steps.push({ kind, moves, text, algorithmId });
-    this.cube = applyMoves(this.cube, moves);
-  }
-
-  /**
-   * Turn the whole cube, describing where it ends up (not how to turn it). When no
-   * turn is needed, still add a "look" step (`already`) so the explanation isn't lost.
-   */
-  rotate(moves: readonly Move[], why: string, already: string): void {
-    if (moves.length === 0) {
-      this.step('check', [], already);
-      return;
-    }
-    const hold = holdDescription(applyMoves(this.cube, moves));
-    this.step('rotate', moves, `${why} Hold it with ${lowerFirst(hold)}`);
-  }
-}
-
-function reorientTo(cube: Cube, top: Color, front: Color): Move[] {
-  const moves = REORIENTATIONS.find((r) => {
-    const turned = applyMoves(cube, r);
-    return centerColor(turned, 'U') === top && centerColor(turned, 'F') === front;
-  });
-  if (!moves) throw new Error(`Couldn't find a way to hold the cube with ${top} on top.`);
-  return moves;
-}
 
 // ── Stage 1: the daisy ──────────────────────────────────────────────────
 
@@ -600,16 +517,7 @@ const STAGE_GOALS: ((cube: Cube) => boolean)[] = [
 
 /** Replay a plan from its start and confirm each stage reaches its goal and the cube ends solved. */
 export function selfCheck(plan: SolvePlan): string | null {
-  let cube = plan.start;
-  for (const stage of plan.stages) {
-    for (const step of stage.steps) cube = applyMoves(cube, step.moves);
-    if (!STAGE_GOALS[stage.number - 1](cube)) {
-      return `Stage ${stage.number} (${stage.title}) didn't reach its goal. This is a bug in the app, not a problem with your cube.`;
-    }
-  }
-  return isSolved(cube)
-    ? null
-    : "The plan didn't end solved. This is a bug in the app, not a problem with your cube.";
+  return checkPlan(plan, STAGE_GOALS);
 }
 
 /** Work out the owner's beginner method, stage by stage, for this cube. */
@@ -617,7 +525,10 @@ export function solveBeginner(start: Cube): SolveResult {
   const check = validateStickers(start.stickers);
   if (!check.ok) return { ok: false, error: check.problems.map((p) => p.message).join(' ') };
   try {
-    const w = new PlanWriter(start);
+    const w = new PlanWriter(
+      start,
+      BEGINNER_STAGES.map((s) => s.title),
+    );
     daisy(w);
     whiteCross(w);
     whiteCorners(w);
@@ -628,17 +539,7 @@ export function solveBeginner(start: Cube): SolveResult {
     yellowEdges(w);
     placeCorners(w);
     twistCorners(w);
-    // A stage that needed nothing still gets a step, so the user is told it's done.
-    for (const stage of w.stages) {
-      if (stage.steps.length === 0) {
-        stage.steps.push({
-          kind: 'check',
-          moves: [],
-          text: 'This stage is already done, so move on.',
-        });
-      }
-    }
-    const plan: SolvePlan = { start, stages: w.stages };
+    const plan: SolvePlan = { start, stages: w.finish() };
     const problem = selfCheck(plan);
     return problem ? { ok: false, error: problem } : { ok: true, plan };
   } catch (error) {
@@ -648,25 +549,4 @@ export function solveBeginner(start: Cube): SolveResult {
       error: `${detail} This is a bug in the app, not a problem with your cube.`,
     };
   }
-}
-
-export interface PlannedStep {
-  stage: SolveStage;
-  step: SolveStep;
-  stageIndex: number;
-  stepIndex: number;
-  start: Cube; // the cube just before this step
-}
-
-/** Every step of a plan in order, each with the cube it starts from. */
-export function listSteps(plan: SolvePlan): PlannedStep[] {
-  const steps: PlannedStep[] = [];
-  let cube = plan.start;
-  plan.stages.forEach((stage, stageIndex) => {
-    stage.steps.forEach((step, stepIndex) => {
-      steps.push({ stage, step, stageIndex, stepIndex, start: cube });
-      cube = applyMoves(cube, step.moves);
-    });
-  });
-  return steps;
 }

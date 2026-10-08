@@ -27,6 +27,7 @@ export function App() {
   const [editorStickers, setEditorStickers] = useState<EditorStickers>(blankStickers);
   const [enteredCube, setEnteredCube] = useState<Cube | null>(null);
   const [solve, setSolve] = useState<SolveState>(() => ({
+    method: 'beginner',
     useEntered: false,
     scramble: randomScramble(),
     index: 0,
@@ -54,7 +55,7 @@ export function App() {
           state={solve}
           onStateChange={setSolve}
           onNewScramble={() =>
-            setSolve({ useEntered: false, scramble: randomScramble(), index: 0 })
+            setSolve({ ...solve, useEntered: false, scramble: randomScramble(), index: 0 })
           }
           onEnterCube={() => setScreen('enter')}
         />

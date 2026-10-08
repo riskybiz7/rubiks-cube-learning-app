@@ -90,8 +90,8 @@ export const CUBE_TURN_WORDS: readonly CubeTurnWord[] = [
   },
 ];
 
-/** How a beginner screen writes a move: words for whole-cube turns, letters for the rest. */
-export function beginnerMoveLabel(move: Move): string {
+/** How the lesson screens write a move: words for whole-cube turns, letters for the rest. */
+export function plainMoveLabel(move: Move): string {
   const word = CUBE_TURN_WORDS.find((w) => w.base === move.base && w.turns === move.turns);
   return word ? word.label : formatMove(move);
 }
