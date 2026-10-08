@@ -321,7 +321,7 @@ export const CFOP_STAGES: readonly StageInfo[] = [
     hold: 'Yellow on top, white on the bottom.',
     goal: 'A white cross on the bottom, each edge matching the center beside it.',
     howTo:
-      "Put the four white edges in place one at a time on the bottom layer, without turning the cube over. It's the beginner white cross done upside down and without the daisy. Pick the edge that takes the fewest turns next.",
+      "CFOP is named after its four steps: Cross, F2L, OLL and PLL. Step one: put the four white edges in place one at a time on the bottom layer, without turning the cube over. It's the beginner white cross done upside down and without the daisy. Pick the edge that takes the fewest turns next.",
     tip: 'Planning the whole cross before you turn is the skill fast solvers practise. Take your time while you learn.',
     algorithmIds: [],
   },
@@ -331,7 +331,7 @@ export const CFOP_STAGES: readonly StageInfo[] = [
     hold: 'Yellow on top.',
     goal: 'The first two layers done: the cross plus the four corner-and-edge pairs.',
     howTo:
-      "Pick a slot: a bottom corner and the middle edge above it. Turn the whole cube so that slot is at the front right, turn the top to line up the case, then do its algorithm. It pairs the corner and edge in the top layer and drops them in together. If a piece you need is stuck in another slot, take it out first with R U R' from that slot.",
+      "F2L stands for First Two Layers. Instead of all the white corners and then all the middle edges (beginner stages 3 and 4), you put each corner in together with the middle edge above it. Pick a slot: a bottom corner and the middle edge above it. Turn the whole cube so that slot is at the front right, turn the top to line up the case, then do its algorithm. It pairs the corner and edge in the top layer and drops them in together. If a piece you need is stuck in another slot, take it out first with R U R' from that slot.",
     tip: "There are 41 cases. You don't need them memorized to start: the Solve screen shows which one you have.",
     algorithmIds: idsOf('F2L'),
   },
@@ -341,7 +341,7 @@ export const CFOP_STAGES: readonly StageInfo[] = [
     hold: 'Yellow on top.',
     goal: 'The whole top face yellow.',
     howTo:
-      'Two looks. First make a yellow cross: a line, an L shape or a dot, one algorithm each. Then make the whole top yellow: 7 corner cases. Turn the top to line up the case before each algorithm; the Solve screen shows how.',
+      'OLL stands for Orient the Last Layer: turn every top piece yellow side up. The pieces can still be in the wrong places. 2-look means two smaller steps, with fewer algorithms to learn. First make a yellow cross: a line, an L shape or a dot, one algorithm each. (The line is your beginner yellow-cross algorithm.) Then make the whole top yellow: 7 corner cases. Turn the top to line up the case before each algorithm; the Solve screen shows how.',
     algorithmIds: idsOf('OLL-2LOOK'),
   },
   {
@@ -350,7 +350,7 @@ export const CFOP_STAGES: readonly StageInfo[] = [
     hold: 'Yellow on top.',
     goal: 'Solved!',
     howTo:
-      'Two looks. First put the corners in place: two side by side swapped (T-perm) or two diagonal swapped (Y-perm). Then the edges: Ua, Ub, H or Z. Finish by turning the top to line it up.',
+      'PLL stands for Permute the Last Layer: move the top pieces to their right places without spoiling the yellow top. This finishes the cube. 2-look means two smaller steps. First put the corners in place: two side by side swapped (T-perm) or two diagonal swapped (Y-perm). Then the edges: Ua, Ub, H or Z. Finish by turning the top to line it up.',
     algorithmIds: idsOf('PLL-2LOOK'),
   },
   {
@@ -359,7 +359,7 @@ export const CFOP_STAGES: readonly StageInfo[] = [
     hold: 'Yellow on top.',
     goal: 'The whole top face yellow, with one algorithm.',
     howTo:
-      'Instead of two looks, read the whole top at once and do one algorithm: 57 cases. Most people learn a few at a time and use 2-look for the rest. To practise, choose Full for OLL on the Solve screen.',
+      'The same goal as 2-look OLL (the whole top yellow), but in one step. Instead of two looks, read the whole top at once and do one algorithm: 57 cases. Most people learn a few at a time and use 2-look for the rest. To practise, choose Full for OLL on the Solve screen.',
     tip: 'Mark cases as learning or learned on the Algorithms screen as you go.',
     algorithmIds: inSet('OLL').map((a) => a.id),
     fullSet: true,
@@ -370,7 +370,7 @@ export const CFOP_STAGES: readonly StageInfo[] = [
     hold: 'Yellow on top.',
     goal: 'Solved, with one algorithm and a last turn of the top.',
     howTo:
-      'Read the sides of the top layer and do one algorithm: 21 cases. Start with the ones 2-look already taught you (T, Y, Ua, Ub, H and Z). To practise, choose Full for PLL on the Solve screen.',
+      'The same goal as 2-look PLL (finish the cube), but in one step. Read the sides of the top layer and do one algorithm: 21 cases. Start with the ones 2-look already taught you (T, Y, Ua, Ub, H and Z). To practise, choose Full for PLL on the Solve screen.',
     algorithmIds: inSet('PLL').map((a) => a.id),
     fullSet: true,
   },

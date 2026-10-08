@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { LastLayerChoice, LookChoice } from '../content/cfop';
+import { TWO_LOOK_VS_FULL } from '../content/cfopTerms';
 import { plainMoveLabel } from '../content/cubeTurnWords';
 import { solveWith } from '../content/methods';
 import { holdDescription } from '../cube/describe';
@@ -108,6 +109,17 @@ export function SolveScreen(props: SolveScreenProps) {
             look={choice.pll}
             onChange={(pll) => changeChoice({ ...choice, pll })}
           />
+          <details className="help">
+            <summary>2-look or Full: what's the difference?</summary>
+            <p>
+              <strong>OLL</strong> (Orient the Last Layer) makes the whole top yellow.{' '}
+              <strong>PLL</strong> (Permute the Last Layer) then moves the top pieces to their
+              places and finishes the cube.
+            </p>
+            <p>{TWO_LOOK_VS_FULL.twoLook}</p>
+            <p>{TWO_LOOK_VS_FULL.full}</p>
+            <p className="hint">{TWO_LOOK_VS_FULL.advice}</p>
+          </details>
         </>
       )}
       <div className="controls">

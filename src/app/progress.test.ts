@@ -101,6 +101,11 @@ describe('progress', () => {
     expect(parseProgress(JSON.stringify({ method: 'cfop' })).method).toBe('cfop');
   });
 
+  it('keeps marks on beginner algorithms too', () => {
+    const p = parseProgress(JSON.stringify({ cases: { 'corner-insert': 'learning' } }));
+    expect(p.cases).toEqual({ 'corner-insert': 'learning' });
+  });
+
   it('uses one versioned storage entry', () => {
     const storage = memoryStorage();
     saveProgress(storage, NO_PROGRESS);

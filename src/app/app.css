@@ -333,3 +333,14 @@ h2 {
   font-size: 0.85rem;
   padding: 4px 8px;
 }
+
+.terms {
+  margin: 8px 0;
+}
+.terms dt {
+  font-weight: 600;
+  margin-top: 8px;
+}
+.terms dd {
+  margin: 2px 0 0 0;
+}

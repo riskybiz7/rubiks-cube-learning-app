@@ -1,3 +1,4 @@
+import { BEGINNER_CARDS } from '../content/algorithms';
 import { CFOP_ALGORITHMS, TWO_LOOK, type LastLayerChoice, type LookChoice } from '../content/cfop';
 import { METHODS, STAGES_FOR, type Method } from '../content/methods';
 
@@ -29,7 +30,8 @@ export type ProgressStorage = Pick<Storage, 'getItem' | 'setItem'>;
 /** The name a lesson is saved under, e.g. "beginner-3" or "cfop-5". */
 export const lessonKey = (method: Method, number: number) => `${method}-${number}`;
 
-const CASE_IDS = new Set(CFOP_ALGORITHMS.map((a) => a.id));
+// Every card on the Algorithms screen: CFOP and the beginner method.
+const CASE_IDS = new Set([...CFOP_ALGORITHMS, ...BEGINNER_CARDS].map((a) => a.id));
 const LESSON_KEYS = new Set(
   METHODS.flatMap(({ method }) => STAGES_FOR[method].map((s) => lessonKey(method, s.number))),
 );
