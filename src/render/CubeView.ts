@@ -15,6 +15,9 @@ export const STICKER_HEX: Record<Color, number> = {
   O: 0xff5800,
 };
 
+/** Screen color for a sticker that hasn't been filled in yet. */
+const BLANK_HEX = 0x9a9a9a;
+
 interface ActiveAnimation {
   pivot: THREE.Group;
   axis: THREE.Vector3;
@@ -67,8 +70,13 @@ export class CubeView implements CubeDisplay {
   }
 
   show(cube: Cube): void {
+    this.showStickers(cube.stickers);
+  }
+
+  /** Like show(), but blank (null) stickers are allowed and drawn grey. Used by the cube editor. */
+  showStickers(stickers: readonly (Color | null)[]): void {
     this.finishAnimation(false); // a jump cancels any animation in progress
-    this.paint(cube);
+    this.paint(stickers);
   }
 
   animate(move: Move, next: Cube, durationMs: number): Promise<void> {
@@ -128,9 +136,9 @@ export class CubeView implements CubeDisplay {
     }
   }
 
-  private paint(cube: Cube): void {
-    cube.stickers.forEach((color, slot) =>
-      this.stickerMaterials[slot].color.setHex(STICKER_HEX[color]),
+  private paint(stickers: readonly (Color | null)[]): void {
+    stickers.forEach((color, slot) =>
+      this.stickerMaterials[slot].color.setHex(color === null ? BLANK_HEX : STICKER_HEX[color]),
     );
   }
 
@@ -143,7 +151,7 @@ export class CubeView implements CubeDisplay {
     // moving them back to the root puts them exactly home.
     for (const cubie of animation.cubies) this.root.add(cubie);
     this.root.remove(animation.pivot);
-    if (completed) this.paint(animation.next);
+    if (completed) this.paint(animation.next.stickers);
     animation.resolve();
   }
 

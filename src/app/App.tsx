@@ -1,122 +1,61 @@
-import { useEffect, useReducer, useRef, useState } from 'react';
-import { formatMove, parseAlgorithm } from '../cube/notation';
-import { CubeView } from '../render/CubeView';
-import { Playback } from '../render/playback';
+import { useState } from 'react';
+import { solved } from '../cube/geometry';
+import type { Cube } from '../cube/types';
+import { blankStickers, type EditorStickers } from '../input/editorState';
+import { EnterCubeScreen } from './EnterCubeScreen';
+import { PlayerScreen } from './PlayerScreen';
 
-const DEFAULT_ALGORITHM = "R U R' U'";
+type Screen = 'player' | 'enter';
 
 export function App() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const playbackRef = useRef<Playback | null>(null);
-  const [, refresh] = useReducer((n: number) => n + 1, 0); // re-draw the page when playback changes
-  const [text, setText] = useState(DEFAULT_ALGORITHM);
-  const [msPerMove, setMsPerMove] = useState(400);
-  const parsed = parseAlgorithm(text);
-
-  // Create the 3D view once, and clean it up when the page goes away.
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const view = new CubeView(container);
-    const playback = new Playback(view);
-    playback.onChange = refresh;
-    playbackRef.current = playback;
-    return () => {
-      playback.pause();
-      playbackRef.current = null;
-      view.dispose();
-    };
-  }, []);
-
-  // Load the algorithm whenever the text changes to a different valid one.
-  const normalized = parsed.ok ? parsed.moves.map(formatMove).join(' ') : null;
-  useEffect(() => {
-    if (normalized === null) return;
-    const result = parseAlgorithm(normalized);
-    if (result.ok) playbackRef.current?.load(result.moves);
-  }, [normalized]);
-
-  useEffect(() => {
-    if (playbackRef.current) playbackRef.current.msPerMove = msPerMove;
-  }, [msPerMove]);
-
-  const playback = playbackRef.current;
-  const position = playback?.position ?? 0;
-  const busy = playback?.isBusy ?? false;
-  const playing = playback?.isPlaying ?? false;
-  const moves = parsed.ok ? parsed.moves : [];
-  const canUse = parsed.ok && playback !== null;
+  const [screen, setScreen] = useState<Screen>('player');
+  // Kept here (not inside each screen) so switching tabs doesn't lose anything.
+  const [algorithm, setAlgorithm] = useState("R U R' U'");
+  const [start, setStart] = useState<Cube>(solved);
+  const [isCustomStart, setIsCustomStart] = useState(false);
+  const [editorStickers, setEditorStickers] = useState<EditorStickers>(blankStickers);
 
   return (
     <main className="app">
-      <h1>Algorithm player</h1>
-      <div className="cube-view" ref={containerRef} />
-      <p className="hint">White on top, green facing you. Drag the cube to look around.</p>
+      <nav className="tabs" aria-label="Screens">
+        <button
+          className={screen === 'player' ? 'active' : ''}
+          aria-current={screen === 'player' ? 'page' : undefined}
+          onClick={() => setScreen('player')}
+        >
+          Algorithm player
+        </button>
+        <button
+          className={screen === 'enter' ? 'active' : ''}
+          aria-current={screen === 'enter' ? 'page' : undefined}
+          onClick={() => setScreen('enter')}
+        >
+          Enter my cube
+        </button>
+      </nav>
 
-      <label className="field">
-        Algorithm
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          spellCheck={false}
-          autoCapitalize="off"
-          autoCorrect="off"
+      {screen === 'player' ? (
+        <PlayerScreen
+          algorithm={algorithm}
+          onAlgorithmChange={setAlgorithm}
+          start={start}
+          isCustomStart={isCustomStart}
+          onUseSolvedStart={() => {
+            setStart(solved());
+            setIsCustomStart(false);
+          }}
         />
-      </label>
-      {!parsed.ok && (
-        <p className="error" role="alert">
-          {parsed.message}
-        </p>
+      ) : (
+        <EnterCubeScreen
+          stickers={editorStickers}
+          onStickersChange={setEditorStickers}
+          onUseCube={(cube) => {
+            setStart(cube);
+            setIsCustomStart(true);
+            setScreen('player');
+          }}
+        />
       )}
-
-      <ol className="move-list">
-        {moves.map((move, i) => (
-          <li key={i} className={i < position ? 'done' : i === position ? 'next' : ''}>
-            {formatMove(move)}
-          </li>
-        ))}
-      </ol>
-
-      <div className="controls">
-        <button onClick={() => playback?.reset()} disabled={!canUse}>
-          ⏮ Reset
-        </button>
-        <button
-          onClick={() => void playback?.stepBack()}
-          disabled={!canUse || busy || playing || position === 0}
-        >
-          ◀ Step back
-        </button>
-        {playing ? (
-          <button onClick={() => playback?.pause()}>⏸ Pause</button>
-        ) : (
-          <button
-            onClick={() => void playback?.play()}
-            disabled={!canUse || busy || moves.length === 0}
-          >
-            ▶ Play
-          </button>
-        )}
-        <button
-          onClick={() => void playback?.stepForward()}
-          disabled={!canUse || busy || playing || position >= moves.length}
-        >
-          Step ▶
-        </button>
-      </div>
-
-      <label className="field">
-        Speed
-        {/* Slider right = faster: the value is stored as 1100 - milliseconds per move. */}
-        <input
-          type="range"
-          min={100}
-          max={1000}
-          step={50}
-          value={1100 - msPerMove}
-          onChange={(e) => setMsPerMove(1100 - Number(e.target.value))}
-        />
-      </label>
     </main>
   );
 }

@@ -22,8 +22,15 @@ unless marked otherwise. This log feeds the design spec.
 | 13 | Color scheme | **Standard**, confirmed from photos 5.1, 10.1, 10.2 | Closes the earlier open item. |
 | 14 | Reference photos in git | **Resized copies only** (`small/`, 7.6 MB); originals (54.0 MB) stay on disk, gitignored | Owner's choice. |
 | 15 | Stage 2 and 6 procedures | **Owner-confirmed.** Stage 2: match petal, turn face twice, flip after all 4. Stage 6: line ×1; reverse L (photo 5.0 hold) ×2; dot ×1 → re-hold as reverse L → ×2 | Stage 6 moves `F R U R' U' F'` also owner-confirmed (checked on the real cube, 2026-09-27). |
-| 17 | Design spec | **Approved** (2026-09-27): `docs/superpowers/specs/2026-09-27-cube-learning-app-design.md` | Next: phase ① implementation plan. |
 | 16 | Flip instructions | Name the **end position** ("white on top, green facing you"), per cubing-tutorial convention | Claude's default, owner deferred; revisit with the running app. |
+| 17 | Design spec | **Approved** (2026-09-27): `docs/superpowers/specs/2026-09-27-cube-learning-app-design.md` | Next: phase ① implementation plan. |
+| 18 | Phase ① outcome | **Merged** into `main` via PR #1 on GitHub (private repo `riskybiz7/rubiks-cube-learning-app`) | Owner: look is as envisioned; 0.4 s default speed OK for now (get beginner feedback later); Play-turns-into-Pause is good as is; pause-in-hidden-tab is good. |
+| 19 | Pieces view (8 corners + 12 edges) | **Build in phase ②** | Owner agreed after explanation. Needed for twist/flip/parity checks and the solvers. |
+| 20 | Center-scheme validation | **Added to spec §5** | Owner: reassembly mistakes (incl. swapped GAN center caps) are realistic even if rare; the app must confirm the cube is solvable and matches the standard design. |
+| 21 | Editable centers in the manual editor | **Pre-filled but editable** (spec §4.1 updated) | Claude's call so decision 20 can actually catch swapped centers; owner authorized autonomous phase ② build. |
+| 22 | Phone layout check | **After the first full draft**, on the owner's phone | Owner has not built a phone app before; keep the current responsive design until then. |
+| 23 | Editor instructions | **Confirmed clear** by the owner in the browser | "How to read each face" kept as written. |
+| 24 | User-facing wording | Always **"squares"**, never "stickers" | Owner's choice. Guarded by a test over every validation message type. "Sticker" stays the internal code term. |
 
 ## Design sections approved
 

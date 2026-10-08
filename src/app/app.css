@@ -80,3 +80,93 @@ h1 {
   font-size: 1rem;
   padding: 8px 14px;
 }
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tabs button {
+  font-size: 1rem;
+  padding: 8px 14px;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+.tabs button.active {
+  background: #1d1d1f;
+  border-color: #1d1d1f;
+  color: #fff;
+}
+.link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #0046ad;
+  text-decoration: underline;
+  font: inherit;
+  cursor: pointer;
+}
+.help {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #fff;
+}
+.help summary {
+  font-weight: 600;
+  cursor: pointer;
+}
+.net {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 3px;
+  width: 100%;
+  max-width: 520px;
+}
+.net-cell {
+  aspect-ratio: 1 / 1;
+  min-width: 0;
+  padding: 0;
+  border: 1px solid #111;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.net-cell.center {
+  border-width: 3px;
+}
+.net-cell.problem {
+  outline: 3px solid #b00020;
+  outline-offset: 1px;
+}
+.palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.swatch {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #111;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.swatch.selected {
+  outline: 3px solid #1d1d1f;
+  outline-offset: 3px;
+}
+.result {
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+.result p {
+  margin: 4px 0;
+}
+.result.ok {
+  background: #e3f4e8;
+}
+.result.bad {
+  background: #fbe4e6;
+}
+.cube-view.preview {
+  max-height: 40vh;
+}

@@ -192,7 +192,9 @@ Enter cube ──► Validate ──► Pick method ──► Build SolvePlan �
 
 ### 4.1 Manual editor (phase 2)
 
-- Unfolded-cube map; pick a color, tap stickers. Centers are fixed and pre-filled.
+- Unfolded-cube map; pick a color, tap stickers. Centers are pre-filled for the reference
+  hold but **editable**, so a cube whose center caps were swapped during reassembly can be
+  entered as it really is and caught by validation (owner request, 2026-09-27).
 - A live 3D preview mirrors the map.
 - A "Check my cube" button runs validation and highlights the problem stickers.
 
@@ -204,14 +206,19 @@ Checked in this order; the first failures are reported in plain English:
 
 | Check | Example message |
 |---|---|
-| 9 stickers of each color | "10 reds and 8 oranges: one orange sticker was probably entered as red." |
+| Every square has a color | "3 squares still need a color." |
+| 9 squares of each color | "10 reds and 8 oranges: one orange square was probably entered as red." |
 | 6 different center colors | "Two centers are both white; each face has its own center color." |
+| Centers match the standard color scheme (white/yellow, red/orange, green/blue opposite; not a mirror image). Added 2026-09-27 at the owner's request: center caps on some cubes (e.g., GAN) can be swapped during reassembly | "The red and orange centers should be on opposite sides." / "The centers are a mirror image of a standard cube; two center caps may have been swapped." |
 | Every corner/edge is a real piece, no duplicates | "There's a red-orange edge, but red and orange are opposite sides and never touch." |
 | Corner twist adds up | "One corner is twisted in place. This usually means a sticker was entered wrong, or the cube was taken apart and reassembled." |
 | Edge flip adds up | Same style |
 | Piece swaps balance (parity) | Same style |
 
 ---
+
+**Wording (owner, 2026-09-27):** everything the user reads says **"squares"** for the colored
+faces of the small cubes, never "stickers". ("Sticker" remains the internal term in the code.)
 
 ## 6. Camera scanner (phase 4)
 
