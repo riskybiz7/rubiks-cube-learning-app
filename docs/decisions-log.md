@@ -20,7 +20,7 @@ unless marked otherwise. This log feeds the design spec.
 | 11 | Algorithm sourcing | Stage order from the owner's photos; algorithms proposed by Claude, labeled **unconfirmed** until the owner checks them | Video of a solve was considered and rejected: moves can't be read reliably from blurry frames. |
 | 12 | Beginner stage map | **10 stages** read from the owner's photos (see `reference/beginner-method/README.md`) | Last layer order: yellow cross → edges → position corners → twist corners. Stages 2 to 4 are done **white up** (owner confirmed). |
 | 13 | Color scheme | **Standard**, confirmed from photos 5.1, 10.1, 10.2 | Closes the earlier open item. |
-| 14 | Reference photos in git | **Resized copies only** (`small/`, 7.6 MB); originals (54.0 MB) stay on disk, gitignored | Owner's choice. |
+| 14 | Reference photos in git | **Resized copies only** (`small/`, 7.6 MB); originals (54.0 MB) stay on disk, gitignored | Owner's choice. 2026-10-08: cropped to the cube for the public repo (owner); `small/` is now 2.1 MB. The uncropped copies stay in git history (owner's choice; checked: no hidden data, nothing readable). |
 | 15 | Stage 2 and 6 procedures | **Owner-confirmed.** Stage 2: match petal, turn face twice, flip after all 4. Stage 6: line ×1; reverse L (photo 5.0 hold) ×2; dot ×1 → re-hold as reverse L → ×2 | Stage 6 moves `F R U R' U' F'` also owner-confirmed (checked on the real cube, 2026-09-27). |
 | 16 | Flip instructions | Name the **end position** ("white on top, green facing you"), per cubing-tutorial convention | Claude's default, owner deferred; revisit with the running app. |
 | 17 | Design spec | **Approved** (2026-09-27): `docs/superpowers/specs/2026-09-27-cube-learning-app-design.md` | Next: phase ① implementation plan. |
