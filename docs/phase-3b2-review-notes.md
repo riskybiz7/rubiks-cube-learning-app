@@ -97,6 +97,12 @@ Logged, not fixed (minor):
 - **Switching OLL while on a PLL step** sends you to the first yellow-top step, which your cube has
   already passed. That's D10 as approved, but it may confuse friends and family. Easy to change.
 
+## Changes from your first look at the app (2026-10-08, decisions #45–#46)
+
+- **One method for the whole app.** Picking Beginner or CFOP on Learn or Solve sets it everywhere and is remembered. The move key follows it (CFOP on Algorithms, every move on the Algorithm player), with a "Show all moves" checkbox. The Learn tab now keeps your lesson when you switch tabs.
+- **Learn uses your cube.** Once a cube passes "Check my cube" (no need to press "Solve this cube"), each lesson's example shows that stage of solving your cube, with a switch back to the standard example.
+- **Checked in the browser:** a scrambled cube was painted square by square in the editor. Every Learn example (CFOP lessons 1, 2 and 4; beginner lesson 1) matched an independent solve of that cube. On a solved cube, CFOP stages 2–6 say "already done on your cube". The beginner daisy still shows 6 moves, because the method always builds the daisy (open question ③a Q1). The key and the shared method were checked on every tab. No console errors. Tests: 226 passing.
+
 ## Deferred (your call)
 
 - **"Solved!" missing** when the last layer needs no final top turn (from ③b-1; seen again here).
