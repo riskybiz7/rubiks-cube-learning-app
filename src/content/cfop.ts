@@ -354,3 +354,16 @@ export const CFOP_STAGES: readonly StageInfo[] = [
     algorithmIds: idsOf('PLL-2LOOK'),
   },
 ];
+
+/** For each half of the last layer: two looks (fewer algorithms) or one (faster). */
+export type LookChoice = 'two-look' | 'full';
+export interface LastLayerChoice {
+  oll: LookChoice;
+  pll: LookChoice;
+}
+export const TWO_LOOK: LastLayerChoice = { oll: 'two-look', pll: 'two-look' };
+
+/** The four stage titles of a CFOP solve: the matching lesson titles. */
+// Until the full OLL/PLL lessons exist (Task 3), both choices use the 2-look titles.
+export const cfopStageTitles = (_choice: LastLayerChoice): string[] =>
+  CFOP_STAGES.map((s) => s.title);

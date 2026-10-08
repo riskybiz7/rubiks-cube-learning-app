@@ -1,5 +1,15 @@
-import { CFOP_ALGORITHMS, CFOP_STAGES, GROUPS, inGroup, type CfopAlgorithm } from '../content/cfop';
-import { COLOR_NAMES, colorList } from '../cube/describe';
+import {
+  CFOP_ALGORITHMS,
+  GROUPS,
+  TWO_LOOK,
+  cardTitle,
+  cfopStageTitles,
+  inGroup,
+  inSet,
+  type CfopAlgorithm,
+  type LastLayerChoice,
+} from '../content/cfop';
+import { COLOR_NAMES, capitalize, colorList } from '../cube/describe';
 import { applyMoves, isSolved } from '../cube/moves';
 import { mustParse, type Move } from '../cube/notation';
 import type { Color, Cube } from '../cube/types';
@@ -192,34 +202,47 @@ function firstTwoLayers(w: PlanWriter): void {
 
 function lookAndDo(
   w: PlanWriter,
-  group: string,
+  algorithms: readonly CfopAlgorithm[],
   goal: (cube: Cube) => boolean,
   what: string,
 ): void {
   if (goal(w.cube)) return;
-  const found = findCase(w.cube, inGroup(group), goal);
+  const found = findCase(w.cube, algorithms, goal);
   if (!found) throw new Error(`Couldn't ${what}.`);
-  const name = found.algorithm.name;
+  const title = cardTitle(found.algorithm);
   lineUpAndDo(
     w,
     found,
-    `Turn the top to line up the ${name} case.`,
-    `${what[0].toUpperCase()}${what.slice(1)}: it's the ${name} case, so do its algorithm.`,
+    `Turn the top to line up the ${title} case.`,
+    `${capitalize(what)}: it's the ${title} case, so do its algorithm.`,
   );
 }
 
 const lastLayerLinesUp = (cube: Cube) => TOP_TURNS.some((turn) => isSolved(applyMoves(cube, turn)));
 
-function yellowTop(w: PlanWriter): void {
+function yellowTop(w: PlanWriter, choice: LastLayerChoice): void {
   w.startStage(3);
-  lookAndDo(w, GROUPS.ollEdges, isYellowCross, 'make the yellow cross');
-  lookAndDo(w, GROUPS.ollCorners, isYellowFace, 'make the whole top yellow');
+  if (choice.oll === 'full') {
+    lookAndDo(w, inSet('OLL'), isYellowFace, 'make the whole top yellow');
+    return;
+  }
+  lookAndDo(w, inGroup(GROUPS.ollEdges), isYellowCross, 'make the yellow cross');
+  lookAndDo(w, inGroup(GROUPS.ollCorners), isYellowFace, 'make the whole top yellow');
 }
 
-function finishTop(w: PlanWriter): void {
+function finishTop(w: PlanWriter, choice: LastLayerChoice): void {
   w.startStage(4);
-  lookAndDo(w, GROUPS.pllCorners, topCornersMatchAfterTopTurn, 'put the corners in place');
-  lookAndDo(w, GROUPS.pllEdges, lastLayerLinesUp, 'put the edges in place');
+  if (choice.pll === 'full') {
+    lookAndDo(w, inSet('PLL'), lastLayerLinesUp, 'finish the top');
+  } else {
+    lookAndDo(
+      w,
+      inGroup(GROUPS.pllCorners),
+      topCornersMatchAfterTopTurn,
+      'put the corners in place',
+    );
+    lookAndDo(w, inGroup(GROUPS.pllEdges), lastLayerLinesUp, 'put the edges in place');
+  }
   const k = TOP_TURNS.findIndex((turn) => isSolved(applyMoves(w.cube, turn)));
   if (k < 0) throw new Error("The cube didn't finish solved.");
   w.step('moves', TOP_TURNS[k], 'Turn the top to line it up. Solved!');
@@ -230,19 +253,16 @@ export function cfopSelfCheck(plan: SolvePlan): string | null {
   return checkPlan(plan, STAGE_GOALS);
 }
 
-/** Work out a CFOP solve (cross, F2L, 2-look OLL, 2-look PLL) for this cube. */
-export function solveCfop(start: Cube): SolveResult {
+/** Work out a CFOP solve: cross, F2L, then OLL and PLL in two looks or one, as chosen. */
+export function solveCfop(start: Cube, choice: LastLayerChoice = TWO_LOOK): SolveResult {
   const check = validateStickers(start.stickers);
   if (!check.ok) return { ok: false, error: check.problems.map((p) => p.message).join(' ') };
   try {
-    const w = new PlanWriter(
-      start,
-      CFOP_STAGES.map((s) => s.title),
-    );
+    const w = new PlanWriter(start, cfopStageTitles(choice));
     cross(w);
     firstTwoLayers(w);
-    yellowTop(w);
-    finishTop(w);
+    yellowTop(w, choice);
+    finishTop(w, choice);
     const plan: SolvePlan = { start, stages: w.finish() };
     const problem = cfopSelfCheck(plan);
     return problem ? { ok: false, error: problem } : { ok: true, plan };
