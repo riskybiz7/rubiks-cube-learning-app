@@ -43,7 +43,7 @@ Every figure below comes from the automated tests or the measuring script descri
 
 | # | Question | My default for now |
 |---|---|---|
-| Q1 | The solver always follows your full method from the daisy, even on a nearly solved cube. A cube one top turn from solved took 48 steps, because the daisy takes the finished cross apart. Keep it faithful, or skip stages that are already done (e.g. start at stage 3 if the white cross is solved)? | Faithful to your method |
+| Q1 | The solver always follows your full method from the daisy, even on a nearly solved cube. A cube one top turn from solved took 48 steps, because the daisy takes the finished cross apart. Keep it faithful, or skip stages that are already done (e.g. start at stage 3 if the white cross is solved)? | Faithful to your method. **Changed 2026-10-08 (decision #47): finished stages are skipped.** |
 | Q2 | Please check the **6 proposed algorithms** on your cube: corner insert `R' D' R D`, middle left `D L D' L' D' F' D F`, middle right `D' R' D R D F D' F'`, yellow edges `R U R' U R U2 R'`, corner cycle `U R U' L' U R' U' L`, corner twist `R' D' R D`. Tests prove they work; the question is whether they're the moves *you* use. | Marked "Proposed" |
 | Q3 | Stage 8: the tests prove the edge swap works with the two matching edges at the **back and right**. Is that how you hold it? | Back and right |
 | Q4 | Stage 9: the tests prove the corner cycle works with the corner that's already in place held at the **front right**. Is that how you do it? | Front right |

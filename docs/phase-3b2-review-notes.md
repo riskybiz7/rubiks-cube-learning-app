@@ -54,7 +54,7 @@ appendix lists all 78 with where each came from.
 - *Derived:* full OLL + PLL saves a median of 84 − 69 = **15 layer turns** per solve on these scrambles.
 - Time depends on the computer and on what else is running. In the same run, the original ③b-1 measurement (2-look only) gave 3.8 ms; ③b-1 recorded 2.9 ms. The cause of the spread wasn't investigated.
 
-**Tests:** 222 passing (2 measurement tests skipped by design). Typecheck and production build green.
+**Tests:** 237 passing (2 measurement tests skipped by design). Typecheck and production build green.
 
 ## Checked in the browser (2026-10-08)
 
@@ -102,6 +102,13 @@ Logged, not fixed (minor):
 - **One method for the whole app.** Picking Beginner or CFOP on Learn or Solve sets it everywhere and is remembered. The move key follows it (CFOP on Algorithms, every move on the Algorithm player), with a "Show all moves" checkbox. The Learn tab now keeps your lesson when you switch tabs.
 - **Learn uses your cube.** Once a cube passes "Check my cube" (no need to press "Solve this cube"), each lesson's example shows that stage of solving your cube, with a switch back to the standard example.
 - **Checked in the browser:** a scrambled cube was painted square by square in the editor. Every Learn example (CFOP lessons 1, 2 and 4; beginner lesson 1) matched an independent solve of that cube. On a solved cube, CFOP stages 2–6 say "already done on your cube". The beginner daisy still shows 6 moves, because the method always builds the daisy (open question ③a Q1). The key and the shared method were checked on every tab. No console errors. Tests: 226 passing.
+
+## Second round of feedback (2026-10-08, decisions #47–#49)
+
+- **A solved cube shows nothing to do.** Both methods give one step, "Your cube is already solved!", and no moves. Before, the beginner method took a solved cube apart and back (165 moves). In the beginner method, a white cross that's already made skips the daisy, and the cross stage only turns the cube white side up. This replaces ③a Q1's "faithful to the method".
+- **The Algorithms tab follows the method.** Beginner shows your 7 algorithms by stage, each held the way the stage is done (white on top for stages 3–4). CFOP shows the sets in the order you'd learn them, starting with F2L.
+- **What the names mean.** Explanations of CFOP, F2L, OLL, PLL, 2-look and Full appear on the Algorithms tab, under the Solve switches, and in the CFOP lessons.
+- **Checked in the browser:** a solved cube gives 0 moves in all 10 beginner lessons and all 6 CFOP lessons, and Solve says "already solved". The beginner Algorithms tab shows 7 cards in 6 stage groups, Watch on "Middle edge to the left" starts white side up, and marks are saved. The CFOP explanations and set descriptions show. Tests: 237 passing (a new test proves all 129 cards' algorithms solve the case they're shown with).
 
 ## Deferred (your call)
 
