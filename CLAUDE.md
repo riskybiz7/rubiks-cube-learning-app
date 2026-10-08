@@ -28,6 +28,9 @@ sticker entry + validation, including the pieces view and center-scheme checks) 
 on branch `phase-2-manual-input`. The owner authorized building phase ② without
 check-ins; log questions for the owner in the phase ② review notes.
 
+Phase ③a (beginner method: solver, Learn and Solve screens) is built on branch
+`phase-3a-beginner` (stacked on phase ②).
+
 GitHub: private repo `riskybiz7/rubiks-cube-learning-app` (remote `origin`).
 
 ## Stack

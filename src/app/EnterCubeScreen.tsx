@@ -33,9 +33,11 @@ interface EnterCubeScreenProps {
   stickers: EditorStickers;
   onStickersChange: (stickers: EditorStickers) => void;
   onUseCube: (cube: Cube) => void;
+  onSolveCube: (cube: Cube) => void;
 }
 
-export function EnterCubeScreen({ stickers, onStickersChange, onUseCube }: EnterCubeScreenProps) {
+export function EnterCubeScreen(props: EnterCubeScreenProps) {
+  const { stickers, onStickersChange, onUseCube, onSolveCube } = props;
   const [color, setColor] = useState<Color>('W');
   const [result, setResult] = useState<ValidationResult | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -151,9 +153,10 @@ export function EnterCubeScreen({ stickers, onStickersChange, onUseCube }: Enter
       {result?.ok && (
         <div className="result ok" role="status">
           <p>✓ This is a real, solvable cube.</p>
-          <button onClick={() => onUseCube(result.cube)}>
-            Use this cube in the algorithm player
-          </button>
+          <div className="controls">
+            <button onClick={() => onSolveCube(result.cube)}>Solve this cube</button>
+            <button onClick={() => onUseCube(result.cube)}>Use in the algorithm player</button>
+          </div>
         </div>
       )}
       {result && !result.ok && (

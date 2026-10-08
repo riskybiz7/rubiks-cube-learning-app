@@ -29,6 +29,11 @@ export function placeName(faces: readonly Face[]): string {
     .join('-');
 }
 
+/** One face in everyday words, e.g. 'U' → "top". */
+export function faceWord(face: Face): string {
+  return FACE_WORDS[face];
+}
+
 /** Color names joined with dashes, e.g. ['W', 'R', 'G'] → "white-red-green". */
 export function colorList(colors: readonly Color[]): string {
   return colors.map((c) => COLOR_NAMES[c]).join('-');

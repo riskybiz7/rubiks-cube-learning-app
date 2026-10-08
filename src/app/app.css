@@ -170,3 +170,111 @@ h1 {
 .cube-view.preview {
   max-height: 40vh;
 }
+h2 {
+  margin: 8px 0 0;
+  font-size: 1.2rem;
+}
+.cube-player {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.stage-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.stage-list button {
+  padding: 6px 10px;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.stage-list button.active,
+.stage-list li.current button {
+  background: #1d1d1f;
+  border-color: #1d1d1f;
+  color: #fff;
+}
+.lesson {
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #fff;
+}
+.lesson p {
+  margin: 6px 0;
+}
+.algorithm {
+  margin: 6px 0;
+}
+.algorithm code {
+  font:
+    1rem ui-monospace,
+    monospace;
+}
+.badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+.badge.confirmed {
+  background: #e3f4e8;
+}
+.badge.proposed {
+  background: #fff3cd;
+}
+.controls button.active {
+  background: #1d1d1f;
+  border-color: #1d1d1f;
+  color: #fff;
+}
+.move-key {
+  margin-top: 16px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #fff;
+}
+.move-key summary {
+  font-weight: 600;
+  cursor: pointer;
+}
+.move-key h3 {
+  margin: 12px 0 4px;
+  font-size: 1rem;
+}
+.move-key th {
+  white-space: nowrap;
+}
+.move-key .key-method {
+  display: block;
+  margin-top: 10px;
+}
+.move-key .reading-tips {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+.move-key table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.move-key th,
+.move-key td {
+  padding: 4px 6px;
+  border-top: 1px solid #eee;
+  text-align: left;
+  vertical-align: top;
+}
+.move-key th code {
+  font:
+    600 1.1rem ui-monospace,
+    monospace;
+}
+.move-key .variants {
+  color: #555;
+}
