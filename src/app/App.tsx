@@ -1,18 +1,21 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { solved } from '../cube/geometry';
 import { randomScramble } from '../cube/scramble';
 import type { Cube } from '../cube/types';
 import { blankStickers, type EditorStickers } from '../input/editorState';
+import { AlgorithmsScreen } from './AlgorithmsScreen';
 import { EnterCubeScreen } from './EnterCubeScreen';
 import { LearnScreen } from './LearnScreen';
 import { MoveKey } from './MoveKey';
 import { PlayerScreen } from './PlayerScreen';
+import { browserStorage, loadProgress, saveProgress } from './progress';
 import { SolveScreen, type SolveState } from './SolveScreen';
 
-type Screen = 'learn' | 'solve' | 'enter' | 'player';
+type Screen = 'learn' | 'algorithms' | 'solve' | 'enter' | 'player';
 
 const TABS: { screen: Screen; label: string }[] = [
   { screen: 'learn', label: 'Learn' },
+  { screen: 'algorithms', label: 'Algorithms' },
   { screen: 'solve', label: 'Solve my cube' },
   { screen: 'enter', label: 'Enter my cube' },
   { screen: 'player', label: 'Algorithm player' },
@@ -20,6 +23,13 @@ const TABS: { screen: Screen; label: string }[] = [
 
 export function App() {
   const [screen, setScreen] = useState<Screen>('learn');
+  // Progress (card marks, lesson ticks, 2-look/full) is kept in this browser only.
+  const storage = useMemo(browserStorage, []);
+  const [progress, setProgress] = useState(() => loadProgress(storage));
+  const [canSave, setCanSave] = useState(true);
+  useEffect(() => {
+    setCanSave(saveProgress(storage, progress));
+  }, [storage, progress]);
   // Kept here (not inside each screen) so switching tabs doesn't lose anything.
   const [algorithm, setAlgorithm] = useState("R U R' U'");
   const [playerStart, setPlayerStart] = useState<Cube>(solved);
@@ -48,7 +58,16 @@ export function App() {
         ))}
       </nav>
 
-      {screen === 'learn' && <LearnScreen />}
+      {!canSave && (
+        <p className="hint">
+          This browser isn't keeping your progress (for example, in a private window).
+        </p>
+      )}
+
+      {screen === 'learn' && <LearnScreen progress={progress} onProgressChange={setProgress} />}
+      {screen === 'algorithms' && (
+        <AlgorithmsScreen progress={progress} onProgressChange={setProgress} />
+      )}
       {screen === 'solve' && (
         <SolveScreen
           enteredCube={enteredCube}
@@ -58,6 +77,8 @@ export function App() {
             setSolve({ ...solve, useEntered: false, scramble: randomScramble(), index: 0 })
           }
           onEnterCube={() => setScreen('enter')}
+          progress={progress}
+          onProgressChange={setProgress}
         />
       )}
       {screen === 'enter' && (

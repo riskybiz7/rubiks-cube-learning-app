@@ -286,3 +286,50 @@ h2 {
   cursor: pointer;
   font-weight: 600;
 }
+
+.lesson-done {
+  display: block;
+  margin: 10px 0 4px;
+  font-weight: 600;
+}
+.usual {
+  margin-top: 2px;
+  color: #555;
+  font-size: 0.9rem;
+}
+.look-choice span {
+  align-self: center;
+  font-weight: 600;
+}
+.case-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+  margin: 8px 0;
+}
+.case-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: #fff;
+}
+.case-card.learning {
+  border-color: #f0c36d;
+}
+.case-card.learned {
+  border-color: #6cbf84;
+}
+.case-card .algorithm {
+  margin: 0;
+}
+.case-diagram {
+  width: 72px;
+  height: 72px;
+}
+.controls.status button {
+  font-size: 0.85rem;
+  padding: 4px 8px;
+}

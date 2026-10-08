@@ -4,27 +4,20 @@ import { plainMoveLabel } from '../content/cubeTurnWords';
 import { demoLesson } from '../content/demo';
 import { STAGES_FOR, type Method } from '../content/methods';
 import { holdDescription } from '../cube/describe';
+import { AlgorithmCard } from './AlgorithmCard';
 import { CubePlayer } from './CubePlayer';
 import { MethodButtons } from './MethodButtons';
+import { lessonKey, withLessonDone, type Progress } from './progress';
 
-/** An algorithm with a badge saying whether the owner has confirmed it yet. */
-export function AlgorithmCard({ id }: { id: string }) {
-  const algorithm = findAlgorithm(id);
-  const confirmed = algorithm.provenance === 'owner-confirmed';
-  return (
-    <div className="algorithm">
-      <strong>{algorithm.name}:</strong> <code>{algorithm.moves}</code>{' '}
-      <span className={`badge ${confirmed ? 'confirmed' : 'proposed'}`}>
-        {confirmed ? '✓ Confirmed' : 'Proposed: check against your cube'}
-      </span>
-    </div>
-  );
-}
-
-/** A lesson's algorithm cards, folded into groups when the algorithms have them (e.g. F2L). */
-function AlgorithmList({ ids }: { ids: readonly string[] }) {
+/**
+ * A lesson's algorithm cards, folded into groups when the algorithms have them (e.g. F2L).
+ * The full OLL/PLL lessons group by shape (`fullGroup`) instead of by 2-look step.
+ */
+function AlgorithmList({ ids, fullSet }: { ids: readonly string[]; fullSet?: boolean }) {
   const algorithms = ids.map(findAlgorithm);
-  const groups = [...new Set(algorithms.map((a) => a.group))];
+  const groupOf = (a: (typeof algorithms)[number]) =>
+    fullSet ? (a.fullGroup ?? a.group) : a.group;
+  const groups = [...new Set(algorithms.map(groupOf))];
   if (groups.every((group) => group === undefined)) {
     return (
       <>
@@ -37,7 +30,7 @@ function AlgorithmList({ ids }: { ids: readonly string[] }) {
   return (
     <>
       {groups.map((group) => {
-        const inGroup = algorithms.filter((a) => a.group === group);
+        const inGroup = algorithms.filter((a) => groupOf(a) === group);
         return (
           <details key={group} className="algorithm-group">
             <summary>
@@ -60,16 +53,22 @@ const INTRO: Record<Method, { heading: string; hint: string }> = {
   },
   cfop: {
     heading: 'Learn: CFOP',
-    hint: 'Cross, F2L, then the last layer in two looks for each half (OLL and PLL). Pick a stage to read how it works and watch an example.',
+    hint: 'Cross, F2L, then the last layer: first in two looks for each half (OLL and PLL), then in one look each. Pick a stage to read how it works and watch an example.',
   },
 };
 
-export function LearnScreen() {
+interface LearnScreenProps {
+  progress: Progress;
+  onProgressChange: (progress: Progress) => void;
+}
+
+export function LearnScreen({ progress, onProgressChange }: LearnScreenProps) {
   const [method, setMethod] = useState<Method>('beginner');
   const [selected, setSelected] = useState(0);
   const stages = STAGES_FOR[method];
   const info = stages[selected];
   const demo = demoLesson(selected, method);
+  const isDone = (number: number) => progress.lessonsDone.includes(lessonKey(method, number));
 
   return (
     <>
@@ -87,6 +86,7 @@ export function LearnScreen() {
           <li key={stage.number}>
             <button className={i === selected ? 'active' : ''} onClick={() => setSelected(i)}>
               {stage.number}. {stage.title}
+              {isDone(stage.number) && ' ✓'}
             </button>
           </li>
         ))}
@@ -104,7 +104,19 @@ export function LearnScreen() {
         </p>
         <p>{info.howTo}</p>
         {info.tip && <p className="hint">Tip: {info.tip}</p>}
-        <AlgorithmList ids={info.algorithmIds} />
+        <AlgorithmList ids={info.algorithmIds} fullSet={info.fullSet} />
+        <label className="lesson-done">
+          <input
+            type="checkbox"
+            checked={isDone(info.number)}
+            onChange={(e) =>
+              onProgressChange(
+                withLessonDone(progress, lessonKey(method, info.number), e.target.checked),
+              )
+            }
+          />{' '}
+          Mark this lesson done
+        </label>
       </section>
 
       <h2>Example</h2>
