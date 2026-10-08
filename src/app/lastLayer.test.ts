@@ -41,4 +41,10 @@ describe('switching 2-look/full mid-solve (D10)', () => {
       firstOfStage(after, 2),
     );
   });
+
+  it('tapping the choice that is already on keeps your step, even in the last layer', () => {
+    // Found in the final review: re-tapping "2-look" on step 20 jumped back to the yellow top.
+    const late = before.length - 1;
+    expect(indexAfterChoiceChange(before, steps('two-look'), late)).toBe(late);
+  });
 });

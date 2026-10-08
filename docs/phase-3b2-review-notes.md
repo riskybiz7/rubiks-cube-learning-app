@@ -18,15 +18,19 @@ Branch `phase-3b2-algorithms`, from `main`. Plan:
 4. **Learn → CFOP:** lessons 5 (full OLL) and 6 (full PLL). Each lesson has a
    *Mark this lesson done* tick (beginner lessons too).
 5. Reload the page: marks, ticks and the 2-look/full choice are still there.
-6. **Please also try a private window.** If the browser blocks storage there, a line should
-   say progress isn't being kept. This one couldn't be checked from the automated browser;
-   the blocked-storage behavior is covered by tests.
+6. **Please also try a private window.** Most browsers allow storage there but wipe it when the
+   window closes, so marks will simply be gone next time and no warning appears. Only if the
+   browser blocks storage outright should a line say progress isn't being kept. This couldn't be
+   checked from the automated browser. Tests cover the saving code's handling of blocked storage
+   (`progress.test.ts`), but not the screen showing that line.
 
 ## Please check first
 
 **The 10 algorithms converted to face turns** (D1) are the ones most likely to feel awkward:
 OLL 2, 11, 18, 20, 28, 53, 54, 56, 57 and the Aa-perm. Each card shows the usual online version
-underneath. All 65 new algorithms are marked **Proposed** until you check them; the plan's
+underneath as "Usual online version". For the 10 converted cards it's the same algorithm
+rewritten; for the 18 cards taken from SpeedCubeDB's listed alternatives it's a different
+algorithm for the same case. All 65 new algorithms are marked **Proposed** until you check them; the plan's
 appendix lists all 78 with where each came from.
 
 ## Measurements
@@ -50,7 +54,7 @@ appendix lists all 78 with where each came from.
 - *Derived:* full OLL + PLL saves a median of 84 − 69 = **15 layer turns** per solve on these scrambles.
 - Time depends on the computer and on what else is running. In the same run, the original ③b-1 measurement (2-look only) gave 3.8 ms; ③b-1 recorded 2.9 ms. The cause of the spread wasn't investigated.
 
-**Tests:** 221 passing (2 measurement tests skipped by design). Typecheck and production build green.
+**Tests:** 222 passing (2 measurement tests skipped by design). Typecheck and production build green.
 
 ## Checked in the browser (2026-10-08)
 
@@ -73,6 +77,25 @@ appendix lists all 78 with where each came from.
 - **Colors moved to `src/render/colors.ts`** (the table, not just the helper), so the flat diagrams don't load the 3D code.
 - **A third diagram style, `oll-edges`,** for the three 2-look first-look cards (line, L, dot). That step ignores the corners, so drawing them would mislead.
 - **Extra tests beyond the plan:** diagram directions after L and F; lesson tick/untick; progress updates never change their input; cross and F2L steps identical for either choice.
+
+## Final review (fresh reviewer, 2026-10-08)
+
+No Critical findings; all five Review Focus items confirmed. Fixed:
+- **Important: re-tapping the 2-look/full button already on lost your place** (e.g. step 20 of 23
+  jumped back to the yellow top, asking for an OLL algorithm on a cube already yellow on top).
+  Now nothing moves when the steps didn't change. Test first (red), then the fix.
+- **"Usual version" wording** implied every card is the same algorithm rewritten. Now
+  "Usual online version: … (this app uses a face-turns-only algorithm)".
+- **These notes** overstated what's tested about the private-window line (item 6 above).
+
+Logged, not fixed (minor):
+- **The first page load saves straight back**, dropping anything it couldn't read. Only matters if a
+  future version adds or renames ids and an older branch is then opened on the same address. With
+  two tabs open, the last one to save wins.
+- **Reset puts 2-look/full back to 2-look but doesn't move the Solve step,** so the step number
+  may then point at a different step of the 2-look plan.
+- **Switching OLL while on a PLL step** sends you to the first yellow-top step, which your cube has
+  already passed. That's D10 as approved, but it may confuse friends and family. Easy to change.
 
 ## Deferred (your call)
 

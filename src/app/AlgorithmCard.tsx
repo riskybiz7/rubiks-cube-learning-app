@@ -4,7 +4,7 @@ import { cardTitle } from '../content/cfop';
 /**
  * An algorithm with a badge saying whether the owner has confirmed it yet. When the card's
  * moves differ from the version usually seen online (this app uses face turns only), that
- * version is shown underneath so the two can be matched up.
+ * version is shown underneath. It may be the same algorithm rewritten, or a different one.
  */
 export function AlgorithmCard({ id }: { id: string }) {
   const algorithm = findAlgorithm(id);
@@ -17,7 +17,8 @@ export function AlgorithmCard({ id }: { id: string }) {
       </span>
       {algorithm.usual && (
         <div className="usual">
-          Usual version: <code>{algorithm.usual}</code> (written here with face turns only)
+          Usual online version: <code>{algorithm.usual}</code> (this app uses a face-turns-only
+          algorithm)
         </div>
       )}
     </div>
