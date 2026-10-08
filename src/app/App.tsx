@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { solved } from '../cube/geometry';
 import { randomScramble } from '../cube/scramble';
 import type { Cube } from '../cube/types';
+import type { KeyMethod } from '../content/moveKey';
 import { blankStickers, type EditorStickers } from '../input/editorState';
 import { AlgorithmsScreen } from './AlgorithmsScreen';
 import { EnterCubeScreen } from './EnterCubeScreen';
@@ -23,7 +24,7 @@ const TABS: { screen: Screen; label: string }[] = [
 
 export function App() {
   const [screen, setScreen] = useState<Screen>('learn');
-  // Progress (card marks, lesson ticks, 2-look/full) is kept in this browser only.
+  // Progress (card marks, lesson ticks, 2-look/full, method) is kept in this browser only.
   const storage = useMemo(browserStorage, []);
   const [progress, setProgress] = useState(() => loadProgress(storage));
   const [canSave, setCanSave] = useState(true);
@@ -37,11 +38,24 @@ export function App() {
   const [editorStickers, setEditorStickers] = useState<EditorStickers>(blankStickers);
   const [enteredCube, setEnteredCube] = useState<Cube | null>(null);
   const [solve, setSolve] = useState<SolveState>(() => ({
-    method: 'beginner',
     useEntered: false,
     scramble: randomScramble(),
     index: 0,
   }));
+  const [learnLesson, setLearnLesson] = useState(0);
+  const [learnOnMyCube, setLearnOnMyCube] = useState(true);
+
+  // A new method (picked on either screen, or by a reset) means a different list of
+  // lessons and a different solve, so both start again from the top.
+  useEffect(() => {
+    setLearnLesson(0);
+    setSolve((current) => ({ ...current, index: 0 }));
+  }, [progress.method]);
+
+  // The move key follows the method in use: CFOP for the Algorithms screen, every move for
+  // the algorithm player (it takes any notation), and the chosen method everywhere else.
+  const keyMethod: KeyMethod =
+    screen === 'algorithms' ? 'cfop' : screen === 'player' ? 'all' : progress.method;
 
   return (
     <main className="app">
@@ -64,7 +78,17 @@ export function App() {
         </p>
       )}
 
-      {screen === 'learn' && <LearnScreen progress={progress} onProgressChange={setProgress} />}
+      {screen === 'learn' && (
+        <LearnScreen
+          progress={progress}
+          onProgressChange={setProgress}
+          lesson={learnLesson}
+          onLessonChange={setLearnLesson}
+          enteredCube={enteredCube}
+          onMyCube={learnOnMyCube}
+          onOnMyCubeChange={setLearnOnMyCube}
+        />
+      )}
       {screen === 'algorithms' && (
         <AlgorithmsScreen progress={progress} onProgressChange={setProgress} />
       )}
@@ -85,6 +109,7 @@ export function App() {
         <EnterCubeScreen
           stickers={editorStickers}
           onStickersChange={setEditorStickers}
+          onCubeChecked={setEnteredCube}
           onSolveCube={(cube) => {
             setEnteredCube(cube);
             setSolve({ ...solve, useEntered: true, index: 0 });
@@ -111,7 +136,7 @@ export function App() {
       )}
 
       {/* Always at the very bottom, whichever screen is showing. */}
-      <MoveKey />
+      <MoveKey method={keyMethod} />
     </main>
   );
 }

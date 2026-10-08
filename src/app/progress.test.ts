@@ -10,6 +10,7 @@ import {
   withCaseStatus,
   withLastLayer,
   withLessonDone,
+  withMethod,
   type ProgressStorage,
 } from './progress';
 
@@ -39,6 +40,7 @@ describe('progress', () => {
     p = withCaseStatus(p, 'f2l-3', 'learning');
     p = withLessonDone(p, lessonKey('beginner', 3), true);
     p = withLastLayer(p, { oll: 'full', pll: 'two-look' });
+    p = withMethod(p, 'cfop');
     expect(saveProgress(storage, p)).toBe(true);
     expect(loadProgress(storage)).toEqual(p);
   });
@@ -60,12 +62,14 @@ describe('progress', () => {
         cases: { 'oll-sune': 'learned', 'no-such-case': 'learned', 'pll-t': 'mastered' },
         lessonsDone: ['cfop-2', 'cfop-99', 7, 'cfop-2'],
         lastLayer: { oll: 'full', pll: 'sideways' },
+        method: 'roux',
       }),
     );
     expect(p).toEqual({
       cases: { 'oll-sune': 'learned' },
       lessonsDone: ['cfop-2'],
       lastLayer: { oll: 'full', pll: 'two-look' },
+      method: 'beginner',
     });
   });
 
@@ -90,6 +94,11 @@ describe('progress', () => {
     withLessonDone(NO_PROGRESS, 'cfop-1', true);
     withLastLayer(NO_PROGRESS, { oll: 'full', pll: 'full' });
     expect(JSON.stringify(NO_PROGRESS)).toBe(before);
+  });
+
+  it('remembers the method, starting on beginner', () => {
+    expect(NO_PROGRESS.method).toBe('beginner');
+    expect(parseProgress(JSON.stringify({ method: 'cfop' })).method).toBe('cfop');
   });
 
   it('uses one versioned storage entry', () => {

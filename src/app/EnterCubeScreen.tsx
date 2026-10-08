@@ -30,10 +30,11 @@ interface EnterCubeScreenProps {
   onStickersChange: (stickers: EditorStickers) => void;
   onUseCube: (cube: Cube) => void;
   onSolveCube: (cube: Cube) => void;
+  onCubeChecked: (cube: Cube) => void; // a cube that passed "Check my cube" counts as entered
 }
 
 export function EnterCubeScreen(props: EnterCubeScreenProps) {
-  const { stickers, onStickersChange, onUseCube, onSolveCube } = props;
+  const { stickers, onStickersChange, onUseCube, onSolveCube, onCubeChecked } = props;
   const [color, setColor] = useState<Color>('W');
   const [result, setResult] = useState<ValidationResult | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -136,7 +137,15 @@ export function EnterCubeScreen(props: EnterCubeScreenProps) {
       </div>
 
       <div className="controls">
-        <button onClick={() => setResult(validateStickers(stickers))}>✔ Check my cube</button>
+        <button
+          onClick={() => {
+            const checked = validateStickers(stickers);
+            setResult(checked);
+            if (checked.ok) onCubeChecked(checked.cube);
+          }}
+        >
+          ✔ Check my cube
+        </button>
         <button onClick={() => change(blankStickers())}>Start over</button>
         <button onClick={() => change(solvedStickers())}>Fill as solved</button>
       </div>

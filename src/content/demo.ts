@@ -1,6 +1,7 @@
 import { solved } from '../cube/geometry';
 import { applyMoves } from '../cube/moves';
 import { mustParse } from '../cube/notation';
+import type { Cube } from '../cube/types';
 import { listSteps, type SolvePlan } from '../solver/plan';
 import { DEMO_SCRAMBLE } from './beginner';
 import { TWO_LOOK, type LastLayerChoice } from './cfop';
@@ -20,12 +21,21 @@ const CFOP_DEMO: readonly (readonly [LastLayerChoice, number])[] = [
 
 const cached = new Map<string, SolvePlan>();
 
-/** The solve of the fixed demo scramble, used for the Learn screen's examples. */
-export function demoPlan(method: Method, choice: LastLayerChoice = TWO_LOOK): SolvePlan {
-  const key = `${method}/${choice.oll}/${choice.pll}`;
+const DEMO_CUBE: Cube = applyMoves(solved(), mustParse(DEMO_SCRAMBLE));
+
+/**
+ * The solve used for the Learn screen's examples: of your entered cube if one is given,
+ * otherwise of the fixed demo scramble.
+ */
+export function demoPlan(
+  method: Method,
+  choice: LastLayerChoice = TWO_LOOK,
+  start: Cube = DEMO_CUBE,
+): SolvePlan {
+  const key = `${method}/${choice.oll}/${choice.pll}/${start.stickers.join('')}`;
   let plan = cached.get(key);
   if (!plan) {
-    const result = solveWith(method, applyMoves(solved(), mustParse(DEMO_SCRAMBLE)), choice);
+    const result = solveWith(method, start, choice);
     if (!result.ok) throw new Error(result.error);
     plan = result.plan;
     cached.set(key, plan);
@@ -33,9 +43,13 @@ export function demoPlan(method: Method, choice: LastLayerChoice = TWO_LOOK): So
   return plan;
 }
 
-/** One lesson's example: the cube it starts from, its steps, and all its moves. */
-export function demoLesson(lesson: number, method: Method) {
+/**
+ * One lesson's example: the cube it starts from, its steps, and all its moves. With `mine`
+ * (your entered cube), it's that stage of solving your cube.
+ */
+export function demoLesson(lesson: number, method: Method, mine?: Cube | null) {
   const [choice, stage] = method === 'cfop' ? CFOP_DEMO[lesson] : [TWO_LOOK, lesson];
-  const steps = listSteps(demoPlan(method, choice)).filter((s) => s.stageIndex === stage);
+  const plan = demoPlan(method, choice, mine ?? DEMO_CUBE);
+  const steps = listSteps(plan).filter((s) => s.stageIndex === stage);
   return { start: steps[0].start, steps, moves: steps.flatMap((s) => [...s.step.moves]) };
 }
