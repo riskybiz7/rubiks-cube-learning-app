@@ -18,23 +18,23 @@ first, and later by free-form camera scanning.
 
 ## Status
 
-**Design approved; phases ① to ③b-1 built.** The approved design spec is
-`docs/superpowers/specs/2026-09-27-cube-learning-app-design.md`, and decisions are
+**Design approved; phases ① to ③b-1 built and merged into `main`.** The approved design
+spec is `docs/superpowers/specs/2026-09-27-cube-learning-app-design.md`, and decisions are
 logged in `docs/decisions-log.md`. Each build phase gets its own implementation plan
 in `docs/superpowers/plans/`, reviewed by the owner before any code is written.
 
-Phase ① (cube model + 3D algorithm player) is merged into `main`. Phase ② (manual
-sticker entry + validation, including the pieces view and center-scheme checks) is built
-on branch `phase-2-manual-input`. The owner authorized building phase ② without
-check-ins; log questions for the owner in the phase ② review notes.
+Merged into `main` (PRs #1 to #4, 2026-10-08):
 
-Phase ③a (beginner method: solver, Learn and Solve screens) is built on branch
-`phase-3a-beginner` (stacked on phase ②).
+- Phase ①: cube model + 3D algorithm player.
+- Phase ②: manual sticker entry + validation, including the pieces view and
+  center-scheme checks.
+- Phase ③a: beginner method (solver, Learn and Solve screens).
+- Phase ③b-1: CFOP solve path (cross, 41 F2L cases, 2-look OLL/PLL, method choice on
+  the Solve and Learn screens).
 
-Phase ③b-1 (CFOP solve path: cross, 41 F2L cases, 2-look OLL/PLL, method choice on the
-Solve and Learn screens) is built on branch `phase-3b-cfop` (stacked on ③a). Phase ③b-2
-(full OLL/PLL, Algorithms screen, progress saving) is next. The owner's no-back-turn rule
-applies to the beginner method only; CFOP may turn the back face.
+Phase ③b-2 (full OLL/PLL, Algorithms screen, progress saving) is next. Branch new phases
+off `main`; GitHub deletes a branch automatically once its PR is merged. The owner's
+no-back-turn rule applies to the beginner method only; CFOP may turn the back face.
 
 GitHub: private repo `riskybiz7/rubiks-cube-learning-app` (remote `origin`).
 
