@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { applyMoves, isSolved } from '../cube/moves';
-import { invertMoves, mustParse } from '../cube/notation';
+import { formatAlgorithm, invertMoves, mustParse } from '../cube/notation';
 import { readPieces } from '../cube/pieces';
 import type { Cube } from '../cube/types';
 import {
@@ -14,7 +14,17 @@ import {
 } from '../solver/checks';
 import { TOP_TURNS } from '../solver/plan';
 import { CFOP_HOME, f2lCaseKey, f2lSlotStates, lastLayerStates } from '../test-utils/cfopStates';
-import { CFOP_ALGORITHMS, CFOP_STAGES, GROUPS, inGroup, type CfopAlgorithm } from './cfop';
+import { SPEEDCUBEDB_STANDARD, tidy, withoutYTurns } from '../test-utils/speedcubedb';
+import {
+  CFOP_ALGORITHMS,
+  CFOP_STAGES,
+  GROUPS,
+  cardTitle,
+  groupIn,
+  inGroup,
+  inSet,
+  type CfopAlgorithm,
+} from './cfop';
 
 const F2L = CFOP_ALGORITHMS.filter((a) => a.set === 'F2L');
 const byId = (id: string) => CFOP_ALGORITHMS.find((a) => a.id === id)!;
@@ -154,6 +164,91 @@ describe('CFOP library: 2-look PLL', () => {
   });
 });
 
+/** The SpeedCubeDB case for this card: "OLL 27", "T", "Aa"… */
+const sourceName = (a: CfopAlgorithm) =>
+  a.number !== undefined ? `OLL ${a.number}` : a.name.replace('-perm', '');
+/** The case SpeedCubeDB gives that number or name: undo its standard algorithm. */
+const sourceCase = (a: CfopAlgorithm) =>
+  applyMoves(
+    CFOP_HOME,
+    invertMoves(withoutYTurns(mustParse(SPEEDCUBEDB_STANDARD.get(sourceName(a))!))),
+  );
+
+describe('CFOP library: full OLL', () => {
+  const oriented = lastLayerStates({ orient: true, permute: false });
+
+  it('has 57 cases, numbered 1 to 57', () => {
+    expect(inSet('OLL').map((a) => a.number)).toEqual(Array.from({ length: 57 }, (_, i) => i + 1));
+  });
+
+  it('every pattern on top is made all yellow by exactly one of the 57', () => {
+    expectExactCover(oriented, inSet('OLL'), isYellowFace);
+  }, 30_000);
+
+  it('each number is the case SpeedCubeDB gives that number', () => {
+    for (const a of inSet('OLL')) {
+      expect(solvers(sourceCase(a), [a], isYellowFace, false), cardTitle(a)).toHaveLength(1);
+    }
+  });
+
+  it('the seven second-look cards are OLL 21 to 27', () => {
+    expect(
+      inGroup(GROUPS.ollCorners)
+        .map((a) => a.number)
+        .sort(),
+    ).toEqual([21, 22, 23, 24, 25, 26, 27]);
+  });
+});
+
+describe('CFOP library: full PLL', () => {
+  const arranged = lastLayerStates({ orient: false, permute: true });
+
+  it('has the 21 named cases', () => {
+    expect(inSet('PLL').map(sourceName).sort()).toEqual(
+      [...SPEEDCUBEDB_STANDARD.keys()].filter((k) => !k.startsWith('OLL')).sort(),
+    );
+  });
+
+  it('every arrangement of the top is solved by exactly one of the 21, plus a turn of the top', () => {
+    expectExactCover(arranged, inSet('PLL'), isSolved, true);
+  }, 30_000);
+
+  it('each name is the case SpeedCubeDB gives that name', () => {
+    for (const a of inSet('PLL')) {
+      expect(solvers(sourceCase(a), [a], isSolved, true), a.name).toHaveLength(1);
+    }
+  });
+
+  it('the six 2-look cards are the same cards in full PLL', () => {
+    const ids = new Set(inSet('PLL').map((a) => a.id));
+    for (const a of inSet('PLL-2LOOK')) expect(ids.has(a.id), a.id).toBe(true);
+  });
+});
+
+describe('CFOP library: cards', () => {
+  it('shows the usual version exactly when the card differs from it', () => {
+    for (const a of [...inSet('OLL'), ...inSet('PLL')]) {
+      const standard = SPEEDCUBEDB_STANDARD.get(sourceName(a))!;
+      const same =
+        formatAlgorithm(tidy(withoutYTurns(mustParse(standard)))) ===
+        formatAlgorithm(mustParse(a.moves));
+      expect(a.usual, cardTitle(a)).toBe(same ? undefined : standard);
+    }
+  });
+
+  it('every full-set card has a group to sit in', () => {
+    const groups: string[] = Object.values(GROUPS);
+    for (const a of inSet('OLL')) expect(groups, a.id).toContain(groupIn(a, 'OLL'));
+    for (const a of inSet('PLL')) expect(groups, a.id).toContain(groupIn(a, 'PLL'));
+  });
+
+  it('titles name the number as well as the nickname', () => {
+    expect(cardTitle(byId('oll-sune'))).toBe('OLL 27 (Sune)');
+    expect(cardTitle(byId('oll-1'))).toBe('OLL 1');
+    expect(cardTitle(byId('pll-aa'))).toBe('Aa-perm');
+  });
+});
+
 describe('CFOP library: every algorithm', () => {
   it('uses only face turns: no wide, middle-slice or whole-cube turns', () => {
     for (const a of CFOP_ALGORITHMS) {
@@ -175,9 +270,11 @@ describe('CFOP library: every algorithm', () => {
     for (const a of CFOP_ALGORITHMS) expect(a.provenance, a.id).toBe('claude-proposed');
   });
 
-  it('every CFOP lesson names algorithms that exist, and every algorithm is in a lesson', () => {
+  // Narrowed until the full OLL/PLL lessons arrive (phase 3b-2 plan, Task 3).
+  it('every CFOP lesson names algorithms that exist, and every F2L/2-look algorithm is in one', () => {
     expect(CFOP_STAGES.map((s) => s.number)).toEqual([1, 2, 3, 4]);
     const inLessons = CFOP_STAGES.flatMap((s) => s.algorithmIds);
-    expect([...inLessons].sort()).toEqual(CFOP_ALGORITHMS.map((a) => a.id).sort());
+    const taught = CFOP_ALGORITHMS.filter((a) => a.set !== 'OLL' && a.set !== 'PLL');
+    expect([...inLessons].sort()).toEqual(taught.map((a) => a.id).sort());
   });
 });
