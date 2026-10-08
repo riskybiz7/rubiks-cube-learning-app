@@ -18,7 +18,7 @@ import { randomMoves, seededRandom } from '../test-utils/random';
 import { centerColor } from './checks';
 import { cfopSelfCheck, solveCfop } from './cfop';
 import { crossMoves } from './cross';
-import { ALREADY_DONE, listSteps, reorientTo, type SolvePlan } from './plan';
+import { ALREADY_DONE, ALREADY_SOLVED, listSteps, reorientTo, type SolvePlan } from './plan';
 
 function mustSolve(cube: Cube): SolvePlan {
   const result = solveCfop(cube);
@@ -205,5 +205,17 @@ describe('solveCfop: 2-look or full', () => {
   it('2-look stays the default', () => {
     const start = applyMoves(solved(), mustParse(DEMO_SCRAMBLE));
     expect(solveCfop(start)).toEqual(solveCfop(start, TWO_LOOK));
+  });
+});
+
+describe('solveCfop: a solved cube (owner, 2026-10-08)', () => {
+  it('held any way: no moves at all, and it says so', () => {
+    for (const hold of ['', 'z2', 'y', "x'"]) {
+      const result = solveCfop(applyMoves(solved(), mustParse(hold)), { oll: 'full', pll: 'full' });
+      if (!result.ok) throw new Error(result.error);
+      expect(result.plan.stages.flatMap((s) => s.steps.flatMap((step) => step.moves))).toEqual([]);
+      expect(result.plan.stages[0].steps[0].text).toBe(ALREADY_SOLVED);
+      expect(cfopSelfCheck(result.plan)).toBeNull();
+    }
   });
 });

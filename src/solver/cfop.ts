@@ -29,6 +29,7 @@ import {
   CUBE_TURNS,
   PlanWriter,
   TOP_TURNS,
+  alreadySolvedPlan,
   checkPlan,
   reorientTo,
   type SolvePlan,
@@ -257,6 +258,9 @@ export function cfopSelfCheck(plan: SolvePlan): string | null {
 export function solveCfop(start: Cube, choice: LastLayerChoice = TWO_LOOK): SolveResult {
   const check = validateStickers(start.stickers);
   if (!check.ok) return { ok: false, error: check.problems.map((p) => p.message).join(' ') };
+  if (isSolved(start)) {
+    return { ok: true, plan: alreadySolvedPlan(start, cfopStageTitles(choice)) };
+  }
   try {
     const w = new PlanWriter(start, cfopStageTitles(choice));
     cross(w);

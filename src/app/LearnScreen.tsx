@@ -5,7 +5,8 @@ import { demoLesson } from '../content/demo';
 import { STAGES_FOR, type Method } from '../content/methods';
 import { holdDescription } from '../cube/describe';
 import type { Cube } from '../cube/types';
-import { ALREADY_DONE } from '../solver/plan';
+import { CROSS_ALREADY_MADE } from '../solver/beginner';
+import { ALREADY_DONE, ALREADY_SOLVED } from '../solver/plan';
 import { AlgorithmCard } from './AlgorithmCard';
 import { CubePlayer } from './CubePlayer';
 import { MethodButtons } from './MethodButtons';
@@ -69,6 +70,9 @@ interface LearnScreenProps {
   onOnMyCubeChange: (onMyCube: boolean) => void;
 }
 
+/** Steps that mean "nothing to do here on this cube". */
+const NOTHING_TO_DO = [ALREADY_DONE, ALREADY_SOLVED, CROSS_ALREADY_MADE];
+
 /**
  * The example for a lesson: that stage of solving your cube when asked for and possible,
  * otherwise of the standard example. (Your cube was already checked, so it always solves;
@@ -96,7 +100,7 @@ export function LearnScreen(props: LearnScreenProps) {
   const demo = useMemo(() => lessonExample(selected, method, mine), [selected, method, mine]);
   const isDone = (number: number) => progress.lessonsDone.includes(lessonKey(method, number));
   const where = demo.isMine ? 'your cube' : 'the example cube';
-  const alreadyDone = demo.steps.some((s) => s.step.text === ALREADY_DONE);
+  const alreadyDone = demo.steps.some((s) => NOTHING_TO_DO.includes(s.step.text));
 
   return (
     <>

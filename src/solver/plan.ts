@@ -68,6 +68,16 @@ export function reorientTo(cube: Cube, top: Color, front: Color): Move[] {
 const lowerFirst = (text: string) => text[0].toLowerCase() + text.slice(1);
 
 export const ALREADY_DONE = 'This stage is already done, so move on.';
+export const ALREADY_SOLVED = "Your cube is already solved! There's nothing to do.";
+
+/** The plan for a cube that's already solved: nothing to turn, in any stage (owner, 2026-10-08). */
+export function alreadySolvedPlan(start: Cube, titles: readonly string[]): SolvePlan {
+  const w = new PlanWriter(start, titles);
+  titles.forEach((_, i) => w.startStage(i + 1));
+  const stages = w.finish();
+  stages[0].steps = [{ kind: 'check', moves: [], text: ALREADY_SOLVED }];
+  return { start, stages };
+}
 
 /** Collects stages and steps, keeping track of the cube after each step. */
 export class PlanWriter {
@@ -123,7 +133,8 @@ export function checkPlan(
   let cube = plan.start;
   for (const stage of plan.stages) {
     for (const step of stage.steps) cube = applyMoves(cube, step.moves);
-    if (!goals[stage.number - 1](cube)) {
+    // A stage that leaves the cube solved has done more than its job (e.g. a solved cube).
+    if (!goals[stage.number - 1](cube) && !isSolved(cube)) {
       return `Stage ${stage.number} (${stage.title}) didn't reach its goal. This is a bug in the app, not a problem with your cube.`;
     }
   }
