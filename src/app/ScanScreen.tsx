@@ -51,6 +51,7 @@ const PROBLEM_TEXT: Record<CameraProblem, string> = {
   'not-allowed':
     "The camera wasn't allowed. To scan, allow the camera for this site in your browser's settings, then try again.",
   'no-camera': 'No camera was found on this device.',
+  stopped: 'The camera stopped. Press Start the camera to scan again.',
   other:
     "The camera couldn't start ({detail}). If another app is using it, close that app and try again.",
 };
@@ -58,7 +59,7 @@ const PROBLEM_TEXT: Record<CameraProblem, string> = {
 const HINT_TEXT: Record<Exclude<Hint, null>, string> = {
   still: 'Hold still…',
   dark: "It's a bit dark. Move to more light.",
-  repeat: "You've already scanned this face.",
+  repeat: "You've already scanned this face. If it isn't, press Take it now.",
 };
 
 /** The guided camera scan (decisions #50, #57–#62). */
@@ -70,7 +71,8 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
   const [gotIt, setGotIt] = useState(false);
   const [kind, setKind] = useState<CameraKind>('unknown');
   const [scramble, setScramble] = useState(() => newTestScramble());
-  const [light, setLight] = useState<Light>('daylight');
+  // Test mode: no default, so every test scan carries the light that was really picked.
+  const [light, setLight] = useState<Light | null>(null);
   const [finished, setFinished] = useState<{
     cube: AssembledCube;
     file: TestScanFile;
@@ -79,6 +81,7 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
   const [saveMessage, setSaveMessage] = useState('');
   const videoRef = useRef<HTMLVideoElement>(null);
   const takeNow = useRef(false);
+  const facesBefore = useRef(0);
 
   // The camera is on only while scanning. Leaving the screen (or finishing) turns it off.
   useEffect(() => {
@@ -97,6 +100,13 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
       }
       stream = started.stream;
       setKind(started.kind);
+      // If the camera dies mid-scan, its last picture would freeze on screen and could be taken
+      // as a face. Stop and say so instead. (Our own stopCamera doesn't fire "ended".)
+      stream.getVideoTracks()[0]?.addEventListener('ended', () => {
+        if (cancelled) return;
+        setProblem({ problem: 'stopped', detail: '' });
+        setStage('intro');
+      });
       const video = videoRef.current;
       if (video) {
         video.srcObject = stream;
@@ -115,7 +125,7 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
     if (stage !== 'scanning' || captured.length >= SCAN_STEPS.length) return;
     const canvas = document.createElement('canvas');
     const history: LiveReading[] = [];
-    const earlierCenters = captured.map((c) => c.readings[4]);
+    const earlierFaces = captured.map((c) => c.readings);
     let frameId = 0;
     let last = -Infinity;
     let taken = false;
@@ -130,11 +140,11 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
       history.push({ time, readings });
       while (time - history[0].time > 2 * HOLD_MS) history.shift();
 
-      const earlier = earlierFaceLike(readings[4], earlierCenters);
+      const earlier = earlierFaceLike(readings, earlierFaces);
       // Still showing the face just taken is normal (it's time to turn the cube), so only an
       // older face counts as a repeat worth mentioning. Neither is ever taken again.
       const repeat = earlier >= 0;
-      const olderRepeat = repeat && earlier < earlierCenters.length - 1;
+      const olderRepeat = repeat && earlier < earlierFaces.length - 1;
       const dark = isTooDark(readings);
       const steady = isSteady(history);
       const hint: Hint = olderRepeat
@@ -158,9 +168,14 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
     return () => cancelAnimationFrame(frameId);
   }, [stage, captured]);
 
-  // A short "Got it" after each face.
+  // A short "Got it" after each face taken (not after Redo, which takes one away).
   useEffect(() => {
-    if (captured.length === 0) return;
+    const added = captured.length > facesBefore.current;
+    facesBefore.current = captured.length;
+    if (!added) {
+      setGotIt(false);
+      return;
+    }
     setGotIt(true);
     const timer = setTimeout(() => setGotIt(false), GOT_IT_MS);
     return () => clearTimeout(timer);
@@ -178,7 +193,7 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
     }
     const file = buildTestScan({
       scramble,
-      light,
+      light: light ?? 'other', // can't be null: test mode only starts once a light is picked
       camera: kind,
       device: navigator.userAgent,
       frames,
@@ -200,6 +215,7 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
 
   function scanAnother() {
     setScramble(newTestScramble());
+    setLight(null); // the light may have changed: pick it again
     setCaptured([]);
     setFinished(null);
     setSaveMessage('');
@@ -249,9 +265,12 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
           </div>
         )}
         <div className="controls">
-          <button onClick={startScanning}>📷 Start the camera</button>
+          <button onClick={startScanning} disabled={testMode && light === null}>
+            📷 Start the camera
+          </button>
           <button onClick={onCancel}>Enter by hand instead</button>
         </div>
+        {testMode && light === null && <p className="hint">Pick the light first.</p>}
       </>
     );
   }

@@ -73,6 +73,21 @@ describe('test-scan files', () => {
       error: 'expected colors do not match the scramble',
     });
   });
+
+  it('a face with missing or broken pixels is reported, not a crash', () => {
+    const file = syntheticScan(newTestScramble(seededRandom(47)), 5);
+    const missing = { ...file, faces: file.faces.map((f, i) => (i === 3 ? { picture: '' } : f)) };
+    const broken = {
+      ...file,
+      faces: file.faces.map((f, i) => (i === 3 ? { ...f, pixels: '%%%' } : f)),
+    };
+    for (const bad of [missing, broken]) {
+      expect(parseTestScan(JSON.stringify(bad))).toEqual({
+        ok: false,
+        error: 'a face has missing or broken pixels',
+      });
+    }
+  });
 });
 
 describe('scoreScan', () => {

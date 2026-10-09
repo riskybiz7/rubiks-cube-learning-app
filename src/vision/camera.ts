@@ -4,7 +4,7 @@ import type { CameraKind } from './testScan';
 /** The grid's share of the camera view's shorter side. Tuned in ④c. */
 export const GRID_FRACTION = 0.7;
 
-export type CameraProblem = 'not-secure' | 'not-allowed' | 'no-camera' | 'other';
+export type CameraProblem = 'not-secure' | 'not-allowed' | 'no-camera' | 'stopped' | 'other';
 
 /** Starts the camera, preferring the back camera on phones (decision #62). */
 export async function startCamera(): Promise<

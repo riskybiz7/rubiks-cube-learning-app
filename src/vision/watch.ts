@@ -1,4 +1,4 @@
-import { labDistance, type Lab } from './color';
+import { labDistance, nearestColor, START_GUESSES, type Lab } from './color';
 
 /** One live reading of the face in the grid, and when it was taken (milliseconds). */
 export interface LiveReading {
@@ -14,6 +14,8 @@ export const STEADY_DRIFT = 6;
 export const DARK_L = 25;
 /** Two centers closer than this are taken to be the same face. Tuned in ④c. */
 export const SAME_CENTER = 12;
+/** A face with at least this many of its 9 squares reading the same colors is the same face. */
+export const SAME_PATTERN = 8;
 
 /** True when every square has stayed within STEADY_DRIFT of its newest color for at least holdMs. */
 export function isSteady(history: readonly LiveReading[], holdMs = HOLD_MS): boolean {
@@ -40,7 +42,20 @@ export function isTooDark(readings: readonly Lab[]): boolean {
   return readings.reduce((sum, r) => sum + r.L, 0) / readings.length < DARK_L;
 }
 
-/** Which earlier face has a center that looks the same as this one (-1 if none). */
-export function earlierFaceLike(center: Lab, earlierCenters: readonly Lab[]): number {
-  return earlierCenters.findIndex((c) => labDistance(c, center) < SAME_CENTER);
+/**
+ * Which earlier face this one is (-1 if none): its center looks the same, or at least
+ * SAME_PATTERN of its 9 squares read as the same colors in the same places. The second test
+ * catches the face just taken when a hand's shadow changes how light its center looks.
+ */
+export function earlierFaceLike(
+  face: readonly Lab[],
+  earlierFaces: readonly (readonly Lab[])[],
+): number {
+  const colorsOf = (f: readonly Lab[]) => f.map((lab) => nearestColor(lab, START_GUESSES).color);
+  const these = colorsOf(face);
+  return earlierFaces.findIndex((earlier) => {
+    if (labDistance(earlier[4], face[4]) < SAME_CENTER) return true;
+    const those = colorsOf(earlier);
+    return these.filter((color, k) => color === those[k]).length >= SAME_PATTERN;
+  });
 }

@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import type { Lab } from './color';
-import { earlierFaceLike, isSteady, isTooDark, type LiveReading } from './watch';
+import { solved } from '../cube/geometry';
+import { applyMoves } from '../cube/moves';
+import { randomScramble } from '../cube/scramble';
+import { seededRandom } from '../test-utils/random';
+import { cameraViews, readingsOf } from '../test-utils/scans';
+import { labDistance, type Lab } from './color';
+import { earlierFaceLike, isSteady, isTooDark, SAME_CENTER, type LiveReading } from './watch';
 
 const face = (L: number): Lab[] => Array.from({ length: 9 }, () => ({ L, a: 10, b: 20 }));
 
@@ -37,12 +42,32 @@ describe('isTooDark', () => {
 });
 
 describe('earlierFaceLike', () => {
-  it('finds an earlier face with the same-looking center, and ignores different ones', () => {
-    const earlier: Lab[] = [
-      { L: 50, a: 60, b: 40 },
-      { L: 80, a: 0, b: 0 },
-    ];
-    expect(earlierFaceLike({ L: 83, a: 4, b: 0 }, earlier)).toBe(1); // 5 away
-    expect(earlierFaceLike({ L: 50, a: 30, b: 40 }, earlier)).toBe(-1); // 30 away
+  const faces = (seed: number, noise = 2) =>
+    readingsOf(cameraViews(applyMoves(solved(), randomScramble(25, seededRandom(seed)))), {
+      noise,
+      random: seededRandom(seed + 1000),
+    });
+
+  it('finds the same face shown again', () => {
+    const scanned = faces(51);
+    const again = faces(51, 3)[2]; // step 2's face, read again with fresh noise
+    expect(earlierFaceLike(again, scanned.slice(0, 3))).toBe(2);
+  });
+
+  it('finds the face just taken even when a shadow darkens its center past the limit', () => {
+    const scanned = faces(52);
+    const shadowed = scanned[1].map((lab) => ({ ...lab, L: lab.L - 20 }));
+    expect(labDistance(shadowed[4], scanned[1][4])).toBeGreaterThan(SAME_CENTER);
+    expect(earlierFaceLike(shadowed, scanned.slice(0, 2))).toBe(1);
+  });
+
+  it('never mistakes a different face for an earlier one (50 scrambles, every pair)', () => {
+    for (let seed = 100; seed < 150; seed++) {
+      const scanned = faces(seed);
+      scanned.forEach((face, i) => {
+        const others = scanned.filter((_, j) => j !== i);
+        expect(earlierFaceLike(face, others)).toBe(-1);
+      });
+    }
   });
 });

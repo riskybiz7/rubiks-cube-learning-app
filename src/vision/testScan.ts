@@ -112,7 +112,16 @@ export function parseTestScan(
     return { ok: false, error: 'needs 6 faces' };
   }
   const bytes = file.frameSize * file.frameSize * 4;
-  if (file.faces.some((face) => decodePixels(face.pixels).length !== bytes)) {
+  const pixelCount = (face: TestScanFile['faces'][number]) => {
+    try {
+      return typeof face?.pixels === 'string' ? decodePixels(face.pixels).length : -1;
+    } catch {
+      return -1; // not valid base64
+    }
+  };
+  const counts = file.faces.map(pixelCount);
+  if (counts.includes(-1)) return { ok: false, error: 'a face has missing or broken pixels' };
+  if (counts.some((count) => count !== bytes)) {
     return { ok: false, error: 'a face has the wrong number of pixels' };
   }
   return { ok: true, file };
