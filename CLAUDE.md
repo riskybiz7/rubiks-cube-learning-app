@@ -46,7 +46,7 @@ GitHub: private repo `riskybiz7/rubiks-cube-learning-app` (remote `origin`).
 ## Stack
 
 TypeScript + React (built with Vite), Three.js for 3D, Vitest for tests, Prettier
-for formatting. OpenCV.js (camera, phase 4) is not installed yet.
+for formatting. No OpenCV.js: the guided scan reads colors directly (decision #56).
 
 ## Commands (run from the project root)
 
@@ -107,12 +107,14 @@ Each module has one job and only depends on modules above it in this list:
 
 ## Working with the owner
 
-- Beginner in code (some Python/SQL). Explain syntax choices briefly and lead
-  with the concept. Spreadsheet analogies work well.
+- Strong in Excel financial modeling; newer to Python and SQL. Explain syntax choices briefly
+  and lead with the concept. Spreadsheet analogies work well.
 - Explain before doing; wait for approval on non-trivial steps.
 - Propose better approaches openly and never substitute silently. Ask when
   anything is ambiguous.
 - Readable over clever.
+- Commits carry **no** Claude co-author line (owner, 2026-10-09). PR descriptions keep the
+  "Generated with Claude Code" footer.
 
 ## Environment
 

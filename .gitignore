@@ -10,6 +10,10 @@ coverage/
 # Full-resolution reference photos stay on disk only; resized copies in small/ are committed
 reference/beginner-method/*.jpeg
 
+# Camera test scans stay on this PC; only the results are published (phase 4, D2)
+reference/camera-test/*
+!reference/camera-test/README.md
+
 # Local Claude Code settings
 .claude/settings.local.json
 
