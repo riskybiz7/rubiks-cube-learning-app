@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  // Relative paths, so the built app works under GitHub Pages' /rubiks-cube-learning-app/.
+  base: './',
   // Its own port, so it doesn't collide with other projects' dev servers on the default 5173.
   server: { port: 5190 },
   test: {

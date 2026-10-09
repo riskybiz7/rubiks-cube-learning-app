@@ -8,7 +8,7 @@ A web app that teaches people to solve a 3x3 Rubik's Cube, from first-time
 solvers to people learning advanced (CFOP) algorithms. It shows the cube in 3D,
 animates algorithms step by step, and walks the user through solving **their own
 scrambled cube**. The user's real cube gets into the app by manual sticker entry
-first, and later by free-form camera scanning.
+first, and later by a guided camera scan (one face at a time).
 
 - **Audience:** friends and family learning the beginner method; the owner
   (who already solves with the beginner method) and other keen solvers using
@@ -36,17 +36,24 @@ Merged into `main` (PRs #1 to #5, 2026-10-08):
   browser, plus the owner's feedback (decisions #45–#49; see
   `docs/phase-3b2-review-notes.md`).
 
-Phase ④ (camera scanning) is next. Its plan starts with the owner's choice between local
-HTTPS and putting the app online (spec §10/§11). Branch new phases off `main`; GitHub deletes a branch automatically once its PR is
-merged. The owner's no-back-turn rule applies to the beginner method only; CFOP may turn
-the back face.
+**Phase ④ (guided camera scan): plan approved 2026-10-09**
+(`docs/superpowers/plans/2026-10-09-phase-4-guided-camera.md`, decisions #50–#68). Three parts:
 
-GitHub: private repo `riskybiz7/rubiks-cube-learning-app` (remote `origin`).
+- ④a Online: pre-public cleanup, MIT license, GitHub Pages publishing. In review as PR #6.
+  The repo goes public only on the owner's go.
+- ④b Camera and test mode: the scanner behind `?scan`; test mode behind `?scan=test`.
+- ④c Tune on test batch A, measure on batch B. Its own plan comes once batch A exists.
+
+Branch new phases off `main`; GitHub deletes a branch automatically once its PR is merged. The
+owner's no-back-turn rule applies to the beginner method only; CFOP may turn the back face.
+
+GitHub: repo `riskybiz7/rubiks-cube-learning-app` (remote `origin`). It is private until ④a
+goes public; then it's published at https://riskybiz7.github.io/rubiks-cube-learning-app/.
 
 ## Stack
 
 TypeScript + React (built with Vite), Three.js for 3D, Vitest for tests, Prettier
-for formatting. OpenCV.js (camera, phase 4) is not installed yet.
+for formatting. No OpenCV.js: the guided scan reads colors directly (decision #56).
 
 ## Commands (run from the project root)
 
@@ -70,11 +77,11 @@ Each module has one job and only depends on modules above it in this list:
 | `src/solver/` | Teaching solver: solves the user's cube stage by stage using the chosen method. |
 | `src/render/` | Three.js 3D cube: draws a state, animates moves, play/pause/step/speed. |
 | `src/input/` | Manual "paint the stickers" editor + review screen (phase 2). |
-| `src/vision/` | Free-form camera scanner (phase 4). Outputs the same 54 colors as `input/`. |
+| `src/vision/` | Guided camera scanner (phase 4). Outputs the same 54 colors as `input/`. |
 | `src/app/` | Screens: Learn · Algorithms · Solve My Cube. |
 
 **Build phases:** ① cube model + 3D view → ② manual input + validation →
-③ beginner then CFOP content + teaching solver → ④ free-form camera scanning.
+③ beginner then CFOP content + teaching solver → ④ guided camera scanning.
 
 ## Non-negotiable rules
 
@@ -88,7 +95,8 @@ Each module has one job and only depends on modules above it in this list:
   starting state and assert it ends solved. On failure, show an error and never
   a bad solve.
 - **Scanner accuracy is measured, not guessed.** Report accuracy only from the
-  photo/video test set in `reference/camera-test/`.
+  test scans in `reference/camera-test/` (taken with the app's test mode; tune on batch A,
+  report batch B).
 
 ## Domain conventions
 
@@ -107,12 +115,14 @@ Each module has one job and only depends on modules above it in this list:
 
 ## Working with the owner
 
-- Beginner in code (some Python/SQL). Explain syntax choices briefly and lead
-  with the concept. Spreadsheet analogies work well.
+- Strong in Excel financial modeling; newer to Python and SQL. Explain syntax choices briefly
+  and lead with the concept. Spreadsheet analogies work well.
 - Explain before doing; wait for approval on non-trivial steps.
 - Propose better approaches openly and never substitute silently. Ask when
   anything is ambiguous.
 - Readable over clever.
+- Commits carry **no** Claude co-author line (owner, 2026-10-09). PR descriptions keep the
+  "Generated with Claude Code" footer.
 
 ## Environment
 

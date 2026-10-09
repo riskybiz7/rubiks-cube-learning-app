@@ -1,7 +1,8 @@
 # Rubik's Cube Learning App: Design Spec
 
 **Date:** 2026-09-27
-**Status:** Approved by owner 2026-09-27
+**Status:** Approved by owner 2026-09-27. §2, §3, §6, §10 and §11 amended 2026-10-09 for the
+guided camera scan (phase ④ plan, decisions #50–#68).
 **Inputs:** `docs/decisions-log.md` (decisions 1 to 14), `reference/beginner-method/README.md`
 (the owner's 10-stage method, read from photos)
 
@@ -39,7 +40,7 @@ solved cube, without outside help.
 | UI | **React** | Standard way to build multi-screen web apps |
 | Build tool | **Vite** | Fast dev server; `npm run dev` / `npm test` / `npm run build` |
 | 3D | **Three.js**, used directly inside one React component | The standard web 3D library. The renderer itself has no React dependency, so it stays simple and testable |
-| Vision (phase 4) | **OpenCV.js** | Computer-vision library that runs in the browser. It's a large download, so it loads only when the scanner opens |
+| Vision (phase 4) | **Plain TypeScript**, reading colors from the camera picture | The guided grid means nothing has to be found or straightened, so no vision library is needed (decision #56; OpenCV.js was the original plan) |
 | Tests | **Vitest** | Runs automatically on every change |
 | Storage | Browser `localStorage` | Progress only. Nothing leaves the device |
 
@@ -60,7 +61,7 @@ src/
   solver/    Teaching solvers (beginner, CFOP). Produces a SolvePlan.
   render/    Three.js cube: draws a state, animates moves.
   input/     Manual sticker editor + review screen.            (phase 2)
-  vision/    Free-form camera scanner.                          (phase 4)
+  vision/    Guided camera scanner.                             (phase 4)
   app/       Screens, navigation, progress storage.
 ```
 
@@ -222,34 +223,52 @@ faces of the small cubes, never "stickers". ("Sticker" remains the internal term
 
 ## 6. Camera scanner (phase 4)
 
-Runs entirely **on the device**; no video is uploaded.
+*Rewritten 2026-10-09 for the **guided** scan (decision #50, which replaces the free-form
+design of #6; that version is in git history).*
 
-**Per video frame:**
-1. **Find a face:** 9 sticker-shaped blobs in a 3×3 grid, held roughly square to the camera.
-2. **Flatten** the grid (perspective correction).
-3. **Read 9 colors** in a color format that separates hue from brightness.
-4. **Wait for steady:** accept a face only when the reading holds for a short moment
-   (exact duration tuned during the build).
-5. **Name the face** by its center color. Any order; a clearer later view replaces an earlier one.
+Runs entirely **on the device**. No video is uploaded or recorded.
 
-**Live feedback:** a 6-face checklist, a 3D preview that fills in, and hints
-("hold still", "more light", "turn the face toward the camera").
+**Guided steps** (#57). The screen shows a 3×3 grid over the camera picture and says which
+face to show:
+1. Green facing the camera, white on top.
+2. SPIN LEFT three times: red, then blue, then orange.
+3. SPIN LEFT once more (green again), then TIP FORWARD: white, with green at the bottom.
+4. TIP TWICE: yellow, with green at the top.
+
+After each hold, the camera sees that face exactly as the app stores it (proven by a test
+against the cube model).
+
+**For each face:**
+1. **Read 9 colors** from the middle of each grid cell. Each color is the median of the
+   cell's middle half, in Lab, a color format that separates lightness from color. No vision
+   library is needed (#56).
+2. **Take it** automatically once the picture holds steady for a short moment, is bright enough,
+   and isn't a face already scanned. A "Take it now" button overrides this (#58).
+
+**Live feedback:** a color dot on each square, a flat 6-face map that fills in (#61), and hints
+("hold still", "more light", "already scanned").
 
 **After all 6 faces:**
-- **Red/orange fix:** re-sort all 54 readings into 6 groups of exactly 9, using the
-  cube's own centers as the color reference under the current lighting.
-- **Rotation solve:** try all 4⁶ = 4,096 face-rotation combinations and keep those that pass §5.
-  One → done. None → review with suspect stickers highlighted. Several (rare) → review asks the user to confirm.
-- **Review screen:** same as the manual editor, pre-filled, low-confidence stickers highlighted.
+- **Red/orange fix** (#59): the cube's own centers are the color references under the current
+  lighting. Each square takes its nearest center's color. While a color has more than 9, the
+  cheapest square moves to a color with fewer, ending at exactly 9 of each. Close calls are
+  marked unsure.
+- **Holding slips** (#60): only if the cube fails §5.
+  1. Place each face by its center color, which fixes a SPIN or TIP made the other way.
+  2. Then try all 4⁶ = 4,096 face-turn combinations, using the one with the fewest turned faces
+     if exactly one passes. If several pass, don't guess: a note asks the user to check.
+- **Review screen:** the manual editor, pre-filled, with unsure squares marked by a dashed outline
+  and "?" (#61).
 
-**Front ("selfie") cameras mirror the image**, and the scanner must un-mirror it.
+**Cameras** (#62): phones use the back camera. Computers use the webcam, shown mirror-image
+but always read from the un-mirrored picture.
 
-**Accuracy is measured, never guessed:** reported only from the test set in
-`reference/camera-test/` (the owner's cube, several lighting conditions, stills and video).
+**Accuracy is measured, never guessed:** it is reported only from test scans in
+`reference/camera-test/`, taken with the app's test mode (#63–#66). The truth comes from a
+known scramble. Tuning uses batch A; the reported figure comes from batch B.
 
-**Phone access:** browsers allow camera use only on `localhost` or `https://`. Phone
-testing needs a local HTTPS setup or free static hosting. That decision is made at the start
-of phase 4 (see §10).
+**Phone access:** browsers allow camera use only on `localhost` or `https://`. Decided: the app
+is published on GitHub Pages (#51, #67).
 
 ---
 
@@ -311,7 +330,7 @@ corner) are drafted by Claude and flagged for owner review.
 | **② Manual input** | Editor, validation, review map, 3D preview | Every broken-cube test rejects correctly; owner can enter their real cube |
 | **③a Beginner** | Beginner content + solver; Learn (beginner track); Solve My Cube (beginner) | Stress test passes; **owner walks through a real solve and checks the algorithms (first full draft)** |
 | **③b CFOP** | CFOP content + solver; Learn (CFOP track); Algorithms screen | Enumeration + stress tests pass; owner reviews algorithms |
-| **④ Camera** | Free-form scanner + review | Accuracy on the owner's test set is measured and accepted by the owner |
+| **④ Camera** | Guided scanner + review, in three parts (#55): ④a online (GitHub Pages), ④b camera and test mode, ④c tune and measure | Accuracy on the owner's test batch B is measured and accepted by the owner |
 
 Each phase gets its own implementation plan, written just before it starts.
 
@@ -323,7 +342,7 @@ Each phase gets its own implementation plan, written just before it starts.
 |---|---|
 | Owner review of all *unconfirmed* algorithms | During phase ③a/③b |
 | Wording of the extra stage 7 to 9 cases | Phase ③a |
-| Phone camera access: local HTTPS vs. free hosting (putting the app online is the owner's call) | Start of phase ④ |
+| Phone camera access: local HTTPS vs. free hosting (putting the app online is the owner's call) | **Decided 2026-10-09:** public repo + GitHub Pages (#51) |
 
 ## 12. Future ideas (not planned)
 
