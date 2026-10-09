@@ -73,13 +73,13 @@ Pages for publishing.
 | D18 | **Publishing:** GitHub Actions runs every test and builds the app on every pull request. On `main` it also publishes to **https://riskybiz7.github.io/rubiks-cube-learning-app/**. Progress saved on the live site is separate from progress on localhost | Free for public repos. A broken build or failing test never gets published | None |
 | D19 | **README refresh before going public.** It still says "Status: design phase". New: what the app does, the live link, how it's checked, how to run it. No accuracy claims until ④c | A recruiter may read it first | Draft in Task 1 |
 
-### Open questions for the owner
+### Open questions for the owner (answered 2026-10-09; plan approved the same day)
 
-1. **PR descriptions** end with "🤖 Generated with Claude Code". Drop that on new PRs too, like
-   the co-author lines? (The 5 merged PRs keep theirs unless you edit them on GitHub.)
-2. **License:** with no license file, people can read the code but not reuse it. That's fine
-   for a personal project. Leave it like that, or add one (for example MIT)?
-3. **The CLAUDE.md wording** in Task 1, Step 2: OK as written?
+1. **PR descriptions** keep the "🤖 Generated with Claude Code" footer (owner: "leave it like
+   that").
+2. **License: MIT**, copyright "Michael Riskind" (the name already on the commits). Added in
+   Task 1, Step 3b.
+3. **The CLAUDE.md wording** in Task 1, Step 2: approved as written.
 
 ## Source and checks (run while writing this plan)
 
@@ -143,6 +143,7 @@ v7.0.1, `actions/setup-node` v7.1.0, `actions/upload-pages-artifact` v5.0.0,
 | File | Part | Status | Job |
 |---|---|---|---|
 | `CLAUDE.md`, `README.md` | ④a | Modify | Reword line 110, no-co-author rule, status, live link; README refresh |
+| `LICENSE` | ④a | Create | MIT, copyright Michael Riskind |
 | `.gitignore` | ④a | Modify | Keep camera-test files off GitHub |
 | `vite.config.ts` | ④a | Modify | `base: './'` so the built app works under `/rubiks-cube-learning-app/` |
 | `.github/workflows/publish.yml` | ④a | Create | Test on every PR; test, build and publish on `main` |
@@ -240,6 +241,9 @@ Needs [Node.js](https://nodejs.org/). In the project folder:
 | `reference/` | Photos of the beginner method; notes for the camera tests |
 ````
 
+- [ ] **Step 3b: License.** Create `LICENSE` with the standard MIT text, "Copyright (c) 2026
+  Michael Riskind", and end the README with a "License" section: "MIT. See `LICENSE`."
+
 - [ ] **Step 4: Keep camera-test files off GitHub.** Add to `.gitignore`:
 
 ```gitignore
@@ -262,7 +266,7 @@ real turns up, **stop** and tell the owner before going further.
 
 ```powershell
 git status
-git add CLAUDE.md README.md .gitignore
+git add CLAUDE.md README.md LICENSE .gitignore
 git commit -F <message file>   # "docs: pre-public cleanup (README, CLAUDE.md wording, camera-test ignore)"
 ```
 
