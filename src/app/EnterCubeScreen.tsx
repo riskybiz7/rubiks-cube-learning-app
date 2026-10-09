@@ -25,16 +25,28 @@ const FACE_NAMES: Record<Face, string> = {
   R: 'Right',
 };
 
+/** What the camera wasn't sure about in the last scan (nothing, for a cube entered by hand). */
+export interface ScanMarks {
+  unsure: ReadonlySet<number>; // sticker indices marked with a dashed outline and "?"
+  note: string | null; // e.g. "the app turned a face back"
+}
+
+export const NO_SCAN_MARKS: ScanMarks = { unsure: new Set(), note: null };
+
 interface EnterCubeScreenProps {
   stickers: EditorStickers;
   onStickersChange: (stickers: EditorStickers) => void;
   onUseCube: (cube: Cube) => void;
   onSolveCube: (cube: Cube) => void;
   onCubeChecked: (cube: Cube) => void; // a cube that passed "Check my cube" counts as entered
+  scanMarks: ScanMarks;
+  onScanMarksChange: (marks: ScanMarks) => void;
+  onScan?: () => void; // shows the "Scan with camera" button when given (decision #61)
 }
 
 export function EnterCubeScreen(props: EnterCubeScreenProps) {
   const { stickers, onStickersChange, onUseCube, onSolveCube, onCubeChecked } = props;
+  const { scanMarks, onScanMarksChange, onScan } = props;
   const [color, setColor] = useState<Color>('W');
   const [result, setResult] = useState<ValidationResult | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -63,6 +75,22 @@ export function EnterCubeScreen(props: EnterCubeScreenProps) {
     setResult(null);
   }
 
+  /** Painting a square answers the camera's doubt about it, so its mark goes. */
+  function paint(slot: number) {
+    change(paintSticker(stickers, slot, color));
+    if (scanMarks.unsure.has(slot)) {
+      const unsure = new Set(scanMarks.unsure);
+      unsure.delete(slot);
+      onScanMarksChange({ ...scanMarks, unsure });
+    }
+  }
+
+  /** Starting over or filling as solved replaces the scan, so its marks and note go too. */
+  function replaceAll(next: EditorStickers) {
+    change(next);
+    onScanMarksChange(NO_SCAN_MARKS);
+  }
+
   const highlighted = new Set(
     result && !result.ok ? result.problems.flatMap((p) => p.stickers) : [],
   );
@@ -75,6 +103,20 @@ export function EnterCubeScreen(props: EnterCubeScreenProps) {
         Hold your cube with the <strong>white center on top</strong> and the{' '}
         <strong>green center facing you</strong>. Pick a color, then tap squares to match your cube.
       </p>
+      {onScan && (
+        <div className="controls">
+          <button onClick={onScan}>📷 Scan with camera</button>
+        </div>
+      )}
+      {scanMarks.unsure.size > 0 && (
+        <p className="hint">
+          The camera wasn't sure about {scanMarks.unsure.size}{' '}
+          {scanMarks.unsure.size === 1 ? 'square' : 'squares'}, shown with a dashed outline and a ?.
+          Check {scanMarks.unsure.size === 1 ? 'it' : 'them'} against your cube, then press Check my
+          cube.
+        </p>
+      )}
+      {scanMarks.note && <p className="hint">{scanMarks.note}</p>}
       <details className="help">
         <summary>How to read each face</summary>
         <ul>
@@ -105,9 +147,11 @@ export function EnterCubeScreen(props: EnterCubeScreenProps) {
         {NET_CELLS.map(({ slot, row, col }) => {
           const place = STICKER_SLOTS[slot];
           const current = stickers[slot];
+          const unsure = scanMarks.unsure.has(slot);
           const classes = ['net-cell'];
           if (isCenter(slot)) classes.push('center');
           if (highlighted.has(slot)) classes.push('problem');
+          if (unsure) classes.push('unsure');
           return (
             <button
               key={slot}
@@ -115,9 +159,11 @@ export function EnterCubeScreen(props: EnterCubeScreenProps) {
               style={{ gridRow: row + 1, gridColumn: col + 1, background: cssColor(current) }}
               aria-label={`${FACE_NAMES[place.face]} face, row ${place.row + 1}, column ${
                 place.col + 1
-              }: ${current ? COLOR_NAMES[current] : 'blank'}`}
-              onClick={() => change(paintSticker(stickers, slot, color))}
-            />
+              }: ${current ? COLOR_NAMES[current] : 'blank'}${unsure ? ', camera not sure' : ''}`}
+              onClick={() => paint(slot)}
+            >
+              {unsure ? '?' : null}
+            </button>
           );
         })}
       </div>
@@ -146,8 +192,8 @@ export function EnterCubeScreen(props: EnterCubeScreenProps) {
         >
           ✔ Check my cube
         </button>
-        <button onClick={() => change(blankStickers())}>Start over</button>
-        <button onClick={() => change(solvedStickers())}>Fill as solved</button>
+        <button onClick={() => replaceAll(blankStickers())}>Start over</button>
+        <button onClick={() => replaceAll(solvedStickers())}>Fill as solved</button>
       </div>
       <p className="hint">
         {blanks === 0

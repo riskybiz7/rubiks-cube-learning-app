@@ -134,6 +134,17 @@ h1 {
 .net-cell.center {
   border-width: 3px;
 }
+/* A square the camera wasn't sure about. Before .problem, so a red problem outline wins. */
+.net-cell.unsure {
+  outline: 3px dashed #1d1d1f;
+  outline-offset: 1px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-shadow:
+    0 0 2px #000,
+    0 0 2px #000;
+}
 .net-cell.problem {
   outline: 3px solid #b00020;
   outline-offset: 1px;

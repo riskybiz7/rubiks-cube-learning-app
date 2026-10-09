@@ -5,14 +5,22 @@ import type { Cube } from '../cube/types';
 import type { KeyMethod } from '../content/moveKey';
 import { blankStickers, type EditorStickers } from '../input/editorState';
 import { AlgorithmsScreen } from './AlgorithmsScreen';
-import { EnterCubeScreen } from './EnterCubeScreen';
+import { EnterCubeScreen, NO_SCAN_MARKS, type ScanMarks } from './EnterCubeScreen';
 import { LearnScreen } from './LearnScreen';
 import { MoveKey } from './MoveKey';
 import { PlayerScreen } from './PlayerScreen';
 import { browserStorage, loadProgress, saveProgress } from './progress';
+import { ScanScreen } from './ScanScreen';
 import { SolveScreen, type SolveState } from './SolveScreen';
 
-type Screen = 'learn' | 'algorithms' | 'solve' | 'enter' | 'player';
+// 'scan' isn't a tab: it opens from Enter my cube, and any tab leaves it (turning the camera off).
+type Screen = 'learn' | 'algorithms' | 'solve' | 'enter' | 'player' | 'scan';
+
+/**
+ * Until the owner accepts the scanner's measured accuracy (phase ④c), the scanner shows only on
+ * a link ending in ?scan, and test mode on ?scan=test (decision #61).
+ */
+const SCAN_LINK = new URLSearchParams(window.location.search).get('scan');
 
 const TABS: { screen: Screen; label: string }[] = [
   { screen: 'learn', label: 'Learn' },
@@ -36,6 +44,7 @@ export function App() {
   const [playerStart, setPlayerStart] = useState<Cube>(solved);
   const [isCustomStart, setIsCustomStart] = useState(false);
   const [editorStickers, setEditorStickers] = useState<EditorStickers>(blankStickers);
+  const [scanMarks, setScanMarks] = useState<ScanMarks>(NO_SCAN_MARKS);
   const [enteredCube, setEnteredCube] = useState<Cube | null>(null);
   const [solve, setSolve] = useState<SolveState>(() => ({
     useEntered: false,
@@ -56,6 +65,8 @@ export function App() {
   // the algorithm player (it takes any notation), and the chosen method everywhere else.
   const keyMethod: KeyMethod =
     screen === 'algorithms' ? 'cfop' : screen === 'player' ? 'all' : progress.method;
+  // Scanning is part of entering your cube, so that tab stays lit.
+  const activeTab: Screen = screen === 'scan' ? 'enter' : screen;
 
   return (
     <main className="app">
@@ -63,8 +74,8 @@ export function App() {
         {TABS.map((tab) => (
           <button
             key={tab.screen}
-            className={screen === tab.screen ? 'active' : ''}
-            aria-current={screen === tab.screen ? 'page' : undefined}
+            className={activeTab === tab.screen ? 'active' : ''}
+            aria-current={activeTab === tab.screen ? 'page' : undefined}
             onClick={() => setScreen(tab.screen)}
           >
             {tab.label}
@@ -120,6 +131,20 @@ export function App() {
             setIsCustomStart(true);
             setScreen('player');
           }}
+          scanMarks={scanMarks}
+          onScanMarksChange={setScanMarks}
+          onScan={SCAN_LINK === null ? undefined : () => setScreen('scan')}
+        />
+      )}
+      {screen === 'scan' && (
+        <ScanScreen
+          testMode={SCAN_LINK === 'test'}
+          onDone={(cube) => {
+            setEditorStickers(cube.stickers);
+            setScanMarks({ unsure: new Set(cube.unsure), note: cube.note });
+            setScreen('enter');
+          }}
+          onCancel={() => setScreen('enter')}
         />
       )}
       {screen === 'player' && (
