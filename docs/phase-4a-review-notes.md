@@ -57,6 +57,17 @@ In this order, once you say go:
 
 Then check the Actions run is green and the link opens.
 
+### Done (2026-10-09, on the owner's go)
+
+- The repo was made public, then GitHub Pages was turned on (published by Actions).
+- PR #6 was merged as merge commit `11d7094`.
+- **Publish run 37982494948:** test-and-build and publish both green.
+- **The live link** answered 200 with the app's title. The script and stylesheet had the same
+  names and sizes as the local build.
+- **In Chrome:**
+  - all 5 tabs open, each with its heading and 3D view;
+  - no console errors, including during a fresh reload.
+
 ## What to try once it's live
 
 1. Open **https://riskybiz7.github.io/rubiks-cube-learning-app/** on your iPhone and on the PC.

@@ -39,16 +39,18 @@ Merged into `main` (PRs #1 to #5, 2026-10-08):
 **Phase ④ (guided camera scan): plan approved 2026-10-09**
 (`docs/superpowers/plans/2026-10-09-phase-4-guided-camera.md`, decisions #50–#68). Three parts:
 
-- ④a Online: pre-public cleanup, MIT license, GitHub Pages publishing. In review as PR #6.
-  The repo goes public only on the owner's go.
-- ④b Camera and test mode: the scanner behind `?scan`; test mode behind `?scan=test`.
+- ④a Online: pre-public cleanup, MIT license, GitHub Pages publishing. **Merged (PR #6,
+  2026-10-09); the repo is public and the app is live.**
+- ④b Camera and test mode: the scanner behind `?scan`; test mode behind `?scan=test`. In
+  review as PR #7 (`docs/phase-4b-review-notes.md`). No accuracy figures exist yet.
 - ④c Tune on test batch A, measure on batch B. Its own plan comes once batch A exists.
 
 Branch new phases off `main`; GitHub deletes a branch automatically once its PR is merged. The
 owner's no-back-turn rule applies to the beginner method only; CFOP may turn the back face.
 
-GitHub: repo `riskybiz7/rubiks-cube-learning-app` (remote `origin`). It is private until ④a
-goes public; then it's published at https://riskybiz7.github.io/rubiks-cube-learning-app/.
+GitHub: **public** repo `riskybiz7/rubiks-cube-learning-app` (remote `origin`). Live app:
+https://riskybiz7.github.io/rubiks-cube-learning-app/. Every push to `main` republishes it
+(`.github/workflows/publish.yml`); pull requests only run the tests and the build.
 
 ## Stack
 
