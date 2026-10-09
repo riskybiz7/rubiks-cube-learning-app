@@ -42,7 +42,7 @@ Merged into `main` (PRs #1 to #5, 2026-10-08):
 - ④a Online: pre-public cleanup, MIT license, GitHub Pages publishing. **Merged (PR #6,
   2026-10-09); the repo is public and the app is live.**
 - ④b Camera and test mode: the scanner behind `?scan`; test mode behind `?scan=test`. In
-  progress on `phase-4b-camera`.
+  review as PR #7 (`docs/phase-4b-review-notes.md`). No accuracy figures exist yet.
 - ④c Tune on test batch A, measure on batch B. Its own plan comes once batch A exists.
 
 Branch new phases off `main`; GitHub deletes a branch automatically once its PR is merged. The
