@@ -65,8 +65,10 @@ describe.skipIf(!import.meta.env.VITE_MEASURE)('camera accuracy', () => {
       const inBatch = rows.filter((r) => r.batch === batch);
       console.log(`\n=== ${batch} ===`);
       for (const { path, file, score } of inBatch) {
+        // Files from before decision #69 have no capture field; they were all taken automatically.
+        const capture = file.capture ?? 'auto';
         console.log(
-          `${path.split('/').pop()}: ${file.camera}, ${file.light}: right ${score.right}/54, ` +
+          `${path.split('/').pop()}: ${file.camera}, ${file.light}, ${capture} capture: right ${score.right}/54, ` +
             `wrong marked ${score.wrongMarked}/${score.wrongMarked + score.wrongUnmarked}, ` +
             `passes check ${score.passesCheck}${score.slip ? ', SET ASIDE (likely scrambling slip)' : ''}`,
         );

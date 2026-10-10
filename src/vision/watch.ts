@@ -16,6 +16,8 @@ export const DARK_L = 25;
 export const SAME_CENTER = 12;
 /** A face with at least this many of its 9 squares reading the same colors is the same face. */
 export const SAME_PATTERN = 8;
+/** Test mode: after "Take this face", take it anyway if the picture hasn't held still by now. */
+export const MANUAL_MAX_WAIT_MS = 3000;
 
 /** True when every square has stayed within STEADY_DRIFT of its newest color for at least holdMs. */
 export function isSteady(history: readonly LiveReading[], holdMs = HOLD_MS): boolean {
@@ -35,6 +37,30 @@ export function isSteady(history: readonly LiveReading[], holdMs = HOLD_MS): boo
     .every((h) =>
       h.readings.every((lab, k) => labDistance(lab, newest.readings[k]) <= STEADY_DRIFT),
     );
+}
+
+/**
+ * Whether to take the face now (decisions #58 and #69).
+ * - Normal scan: automatically once steady, bright enough and not a face already scanned.
+ *   Pressing "Take it now" takes it straight away.
+ * - Test mode (manual): only after "Take this face" is pressed. It then waits for the picture
+ *   to hold still, counting only readings made after the press, so the jolt of tapping the
+ *   screen doesn't blur the face. If it still isn't steady after MANUAL_MAX_WAIT_MS, it takes
+ *   it anyway; "Redo last face" is there if that picture is no good.
+ */
+export function readyToTake(now: {
+  manual: boolean; // test mode
+  pressedAt: number | null; // when the button was pressed (null: not pressed)
+  time: number; // the newest reading's time
+  history: readonly LiveReading[];
+  dark: boolean;
+  repeat: boolean;
+}): boolean {
+  const { manual, pressedAt, time, history, dark, repeat } = now;
+  if (!manual) return pressedAt !== null || (isSteady(history) && !dark && !repeat);
+  if (pressedAt === null) return false;
+  const sincePress = history.filter((h) => h.time >= pressedAt);
+  return isSteady(sincePress) || time - pressedAt >= MANUAL_MAX_WAIT_MS;
 }
 
 /** True when the face looks too dark to read well. */

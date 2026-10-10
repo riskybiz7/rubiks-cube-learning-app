@@ -14,8 +14,31 @@ import {
   expectedColors,
   newTestScramble,
   parseTestScan,
+  rememberedScramble,
+  rememberScramble,
+  SCRAMBLE_KEY,
   scoreScan,
+  type ScrambleStorage,
 } from './testScan';
+
+/** A pretend browser storage, like a one-sheet workbook. */
+function memoryStorage(): ScrambleStorage & { data: Map<string, string> } {
+  const data = new Map<string, string>();
+  return {
+    data,
+    getItem: (key) => data.get(key) ?? null,
+    setItem: (key, value) => void data.set(key, value),
+  };
+}
+
+const blocked: ScrambleStorage = {
+  getItem: () => {
+    throw new Error('blocked');
+  },
+  setItem: () => {
+    throw new Error('blocked');
+  },
+};
 
 /** A test scan of a scramble, from synthetic pictures of the cube it makes. */
 function syntheticScan(scramble: string, seed: number) {
@@ -31,6 +54,7 @@ function syntheticScan(scramble: string, seed: number) {
     scramble,
     light: 'lamp',
     camera: 'back',
+    capture: 'manual',
     device: 'test',
     frames,
     pictures: frames.map(() => ''),
@@ -54,10 +78,19 @@ describe('test-scan files', () => {
     expect(mustParse(newTestScramble(seededRandom(42)))).toHaveLength(15);
   });
 
-  it('a saved file reads back exactly', () => {
+  it('a saved file reads back exactly, including how the faces were taken', () => {
     const file = syntheticScan(newTestScramble(seededRandom(43)), 1);
     const parsed = parseTestScan(JSON.stringify(file));
     expect(parsed).toEqual({ ok: true, file });
+    expect(file.capture).toBe('manual');
+  });
+
+  it('files saved before capture was recorded still read', () => {
+    const older = { ...syntheticScan(newTestScramble(seededRandom(48)), 6) };
+    delete older.capture;
+    const parsed = parseTestScan(JSON.stringify(older));
+    expect(parsed.ok).toBe(true);
+    expect(parsed.ok && parsed.file.capture).toBeUndefined();
   });
 
   it('rejects files that are not test scans, or whose colors do not match the scramble', () => {
@@ -87,6 +120,29 @@ describe('test-scan files', () => {
         error: 'a face has missing or broken pixels',
       });
     }
+  });
+});
+
+describe('remembered test scramble', () => {
+  it('remembers a scramble and gives it back exactly', () => {
+    const storage = memoryStorage();
+    const scramble = newTestScramble(seededRandom(49));
+    expect(rememberScramble(storage, scramble)).toBe(true);
+    expect(rememberedScramble(storage)).toBe(scramble);
+    expect([...storage.data.keys()]).toEqual([SCRAMBLE_KEY]);
+  });
+
+  it('nothing remembered, unreadable text, or blocked storage gives null, never a crash', () => {
+    const storage = memoryStorage();
+    expect(rememberedScramble(storage)).toBeNull();
+    storage.data.set(SCRAMBLE_KEY, 'R Q U');
+    expect(rememberedScramble(storage)).toBeNull();
+    storage.data.set(SCRAMBLE_KEY, 'R U'); // a real algorithm, but not a 15-turn test scramble
+    expect(rememberedScramble(storage)).toBeNull();
+    expect(rememberedScramble(blocked)).toBeNull();
+    expect(rememberedScramble(null)).toBeNull();
+    expect(rememberScramble(blocked, 'R U')).toBe(false);
+    expect(rememberScramble(null, 'R U')).toBe(false);
   });
 });
 
