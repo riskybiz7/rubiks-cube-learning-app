@@ -20,16 +20,26 @@ import {
   buildTestScan,
   LIGHTS,
   newTestScramble,
+  rememberedScramble,
+  rememberScramble,
   scoreScan,
   type CameraKind,
   type Light,
   type ScanScore,
   type TestScanFile,
 } from '../vision/testScan';
-import { earlierFaceLike, HOLD_MS, isSteady, isTooDark, type LiveReading } from '../vision/watch';
+import {
+  earlierFaceLike,
+  HOLD_MS,
+  isSteady,
+  isTooDark,
+  readyToTake,
+  type LiveReading,
+} from '../vision/watch';
+import { browserStorage } from './progress';
 
 interface ScanScreenProps {
-  testMode: boolean; // ?scan=test: show a scramble first and offer to save the scan as a file
+  testMode: boolean; // ?scan=test: a scramble first, faces taken by button, the scan saved as a file
   onDone: (cube: AssembledCube) => void; // go to the review map with this cube
   onCancel: () => void; // back to entering the cube by hand
 }
@@ -41,7 +51,7 @@ interface Captured {
 }
 
 type Stage = 'intro' | 'scanning' | 'finished';
-type Hint = 'still' | 'dark' | 'repeat' | null;
+type Hint = 'still' | 'dark' | 'repeat' | 'press' | null;
 
 const READ_EVERY_MS = 66; // about 15 readings a second
 const GOT_IT_MS = 900; // how long "Got it" shows after a face is taken
@@ -59,7 +69,8 @@ const PROBLEM_TEXT: Record<CameraProblem, string> = {
 const HINT_TEXT: Record<Exclude<Hint, null>, string> = {
   still: 'Hold still…',
   dark: "It's a bit dark. Move to more light.",
-  repeat: "You've already scanned this face. If it isn't, press Take it now.",
+  repeat: "You've already scanned this face. If it isn't, press {button}.",
+  press: 'When the face is in the grid, press {button}.', // test mode only
 };
 
 /** The guided camera scan (decisions #50, #57–#62). */
@@ -70,7 +81,10 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
   const [live, setLive] = useState<{ colors: Color[]; hint: Hint }>({ colors: [], hint: null });
   const [gotIt, setGotIt] = useState(false);
   const [kind, setKind] = useState<CameraKind>('unknown');
-  const [scramble, setScramble] = useState(() => newTestScramble());
+  // Test mode keeps its scramble until "New scramble" (decision #70).
+  const [scramble, setScramble] = useState(
+    () => (testMode && rememberedScramble(browserStorage())) || newTestScramble(),
+  );
   // Test mode: no default, so every test scan carries the light that was really picked.
   const [light, setLight] = useState<Light | null>(null);
   const [finished, setFinished] = useState<{
@@ -80,8 +94,13 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
   } | null>(null);
   const [saveMessage, setSaveMessage] = useState('');
   const videoRef = useRef<HTMLVideoElement>(null);
-  const takeNow = useRef(false);
+  const pressedAt = useRef<number | null>(null); // when "Take it now" / "Take this face" was pressed
   const facesBefore = useRef(0);
+  const takeLabel = testMode ? 'Take this face' : 'Take it now';
+
+  useEffect(() => {
+    if (testMode) rememberScramble(browserStorage(), scramble);
+  }, [testMode, scramble]);
 
   // The camera is on only while scanning. Leaving the screen (or finishing) turns it off.
   useEffect(() => {
@@ -119,8 +138,8 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
     };
   }, [stage]);
 
-  // Read the grid about 15 times a second, and take the face when it's ready (decision #58).
-  // Starts afresh after every capture or redo, so the steadiness check starts over too.
+  // Read the grid about 15 times a second, and take the face when it's ready (decisions #58,
+  // #69). Starts afresh after every capture or redo, so the steadiness check starts over too.
   useEffect(() => {
     if (stage !== 'scanning' || captured.length >= SCAN_STEPS.length) return;
     const canvas = document.createElement('canvas');
@@ -146,20 +165,19 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
       const repeat = earlier >= 0;
       const olderRepeat = repeat && earlier < earlierFaces.length - 1;
       const dark = isTooDark(readings);
-      const steady = isSteady(history);
-      const hint: Hint = olderRepeat
-        ? 'repeat'
-        : repeat
-          ? null
-          : dark
-            ? 'dark'
-            : steady
-              ? null
-              : 'still';
+      const pressed = pressedAt.current;
+      let hint: Hint;
+      if (testMode) {
+        // Faces are taken only by the button; until it's pressed, just warn.
+        hint = pressed !== null ? 'still' : olderRepeat ? 'repeat' : dark ? 'dark' : 'press';
+      } else {
+        const steady = isSteady(history);
+        hint = olderRepeat ? 'repeat' : repeat ? null : dark ? 'dark' : steady ? null : 'still';
+      }
       setLive({ colors: readings.map((r) => nearestColor(r, START_GUESSES).color), hint });
 
-      if (takeNow.current || (steady && !dark && !repeat)) {
-        takeNow.current = false;
+      if (readyToTake({ manual: testMode, pressedAt: pressed, time, history, dark, repeat })) {
+        pressedAt.current = null;
         taken = true;
         setCaptured((list) => [...list, { frame, readings }]);
       }
@@ -195,6 +213,7 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
       scramble,
       light: light ?? 'other', // can't be null: test mode only starts once a light is picked
       camera: kind,
+      capture: 'manual', // test mode takes faces only when the button is pressed (#69)
       device: navigator.userAgent,
       frames,
       pictures: frames.map(pictureOf),
@@ -209,12 +228,12 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
     setCaptured([]);
     setFinished(null);
     setSaveMessage('');
-    takeNow.current = false;
+    pressedAt.current = null;
     setStage('scanning');
   }
 
-  function scanAnother() {
-    setScramble(newTestScramble());
+  function scanAnother(newScramble: boolean) {
+    if (newScramble) setScramble(newTestScramble());
     setLight(null); // the light may have changed: pick it again
     setCaptured([]);
     setFinished(null);
@@ -245,7 +264,13 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
             <ol>
               <li>Start from a solved cube, held with white on top and green facing you.</li>
               <li>
-                Do these moves: <code>{scramble}</code>
+                Do these moves: <code>{scramble}</code>{' '}
+                <button onClick={() => setScramble(newTestScramble())}>New scramble</button>
+                <br />
+                <span className="hint">
+                  This scramble stays until you press New scramble. If your cube already has it from
+                  your last scan, skip steps 1 and 2.
+                </span>
               </li>
               <li>Pick the light:</li>
             </ol>
@@ -262,6 +287,11 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
                 </button>
               ))}
             </div>
+            <p>
+              Then press Start the camera. For each face, line it up in the grid and press{' '}
+              <strong>📷 Take this face</strong>. The camera never takes a face by itself in test
+              mode.
+            </p>
           </div>
         )}
         <div className="controls">
@@ -304,7 +334,8 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
             </button>
           )}
           <button onClick={() => onDone(cube)}>Review on the map</button>
-          <button onClick={scanAnother}>Scan another</button>
+          <button onClick={() => scanAnother(false)}>Scan again, same scramble</button>
+          <button onClick={() => scanAnother(true)}>Scan again, new scramble</button>
         </div>
         {saveMessage && <p className="hint">{saveMessage}</p>}
       </>
@@ -369,13 +400,22 @@ export function ScanScreen({ testMode, onDone, onCancel }: ScanScreenProps) {
       </div>
 
       <p className="scan-status" role="status">
-        {gotIt ? 'Got it ✓' : live.hint ? HINT_TEXT[live.hint] : ''}
+        {gotIt ? 'Got it ✓' : live.hint ? HINT_TEXT[live.hint].replace('{button}', takeLabel) : ''}
       </p>
 
       <div className="controls">
-        <button onClick={() => (takeNow.current = true)}>Take it now</button>
+        <button onClick={() => (pressedAt.current = performance.now())}>
+          {testMode ? `📷 ${takeLabel}` : takeLabel}
+        </button>
         {captured.length > 0 && (
-          <button onClick={() => setCaptured((list) => list.slice(0, -1))}>Redo last face</button>
+          <button
+            onClick={() => {
+              pressedAt.current = null;
+              setCaptured((list) => list.slice(0, -1));
+            }}
+          >
+            Redo last face
+          </button>
         )}
         <button onClick={onCancel}>Cancel</button>
       </div>

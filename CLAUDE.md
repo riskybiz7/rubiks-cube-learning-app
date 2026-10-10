@@ -41,9 +41,16 @@ Merged into `main` (PRs #1 to #5, 2026-10-08):
 
 - ④a Online: pre-public cleanup, MIT license, GitHub Pages publishing. **Merged (PR #6,
   2026-10-09); the repo is public and the app is live.**
-- ④b Camera and test mode: the scanner behind `?scan`; test mode behind `?scan=test`. In
-  review as PR #7 (`docs/phase-4b-review-notes.md`). No accuracy figures exist yet.
-- ④c Tune on test batch A, measure on batch B. Its own plan comes once batch A exists.
+- ④b Camera and test mode: the scanner behind `?scan`; test mode behind `?scan=test`.
+  **Merged (PR #7, 2026-10-09) and live** (`docs/phase-4b-review-notes.md`). No accuracy
+  figures exist yet.
+- ④c Tune on test batch A, measure on batch B. Checklist: `docs/phase-4c-next-steps.md`.
+  - The first PC scans showed auto-capture taking the wrong faces. So test mode now takes faces
+    only by button (#69) and keeps its scramble until "New scramble" (#70). Merged from branch
+    `phase-4c-tune`, 2026-10-09.
+  - **Batch A in progress** (`reference/camera-test/batch-a/`, with `notes.md`): the PC lamp
+    scans are done; iPhone lamp and dim come next, then the daylight scans. Then measure batch
+    A and write the ④c plan.
 
 Branch new phases off `main`; GitHub deletes a branch automatically once its PR is merged. The
 owner's no-back-turn rule applies to the beginner method only; CFOP may turn the back face.

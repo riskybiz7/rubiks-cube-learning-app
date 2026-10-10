@@ -12,6 +12,8 @@ export const TEST_SCAN_FORMAT = 'rubiks-cube-app.test-scan.v1';
 export const LIGHTS = ['daylight', 'lamp', 'dim', 'other'] as const;
 export type Light = (typeof LIGHTS)[number];
 export type CameraKind = 'back' | 'front' | 'unknown';
+/** How the faces were taken: by the app when steady (auto) or by pressing a button (manual). */
+export type CaptureMode = 'auto' | 'manual';
 
 /** Test scrambles are 15 face turns: fewer chances to slip, still well mixed (decision #64). */
 export const TEST_SCRAMBLE_LENGTH = 15;
@@ -24,6 +26,7 @@ export interface TestScanFile {
   expected: Color[]; // the 54 colors the scramble makes (recomputed and compared when measured)
   light: Light;
   camera: CameraKind;
+  capture?: CaptureMode; // missing in files saved before decision #69, which were all 'auto'
   device: string; // the browser's description of itself
   frameSize: number;
   faces: { pixels: string; picture: string }[]; // scan order; pixels = base64 RGBA, picture = JPEG to look at
@@ -33,6 +36,36 @@ export interface TestScanFile {
 
 export function newTestScramble(random: () => number = Math.random): string {
   return formatAlgorithm(randomScramble(TEST_SCRAMBLE_LENGTH, random));
+}
+
+/**
+ * Test mode keeps one scramble until "New scramble" is pressed, remembered in this browser, so
+ * a scan can be repeated without solving and scrambling again (decision #70).
+ */
+export const SCRAMBLE_KEY = 'rubiks-cube-app.test-scramble.v1';
+export type ScrambleStorage = Pick<Storage, 'getItem' | 'setItem'>;
+
+/** The remembered test scramble, or null if there's none (or it can't be read). Never throws. */
+export function rememberedScramble(storage: ScrambleStorage | null): string | null {
+  try {
+    const text = storage?.getItem(SCRAMBLE_KEY) ?? null;
+    if (text === null) return null;
+    const parsed = parseAlgorithm(text);
+    return parsed.ok && parsed.moves.length === TEST_SCRAMBLE_LENGTH ? text : null;
+  } catch {
+    return null; // e.g. storage blocked in a private window
+  }
+}
+
+/** Remember the test scramble; returns false if this browser won't keep it. */
+export function rememberScramble(storage: ScrambleStorage | null, scramble: string): boolean {
+  if (!storage) return false;
+  try {
+    storage.setItem(SCRAMBLE_KEY, scramble);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** The 54 colors a scramble makes from a solved cube in the reference hold. */
@@ -64,6 +97,7 @@ export function buildTestScan(input: {
   scramble: string;
   light: Light;
   camera: CameraKind;
+  capture: CaptureMode;
   device: string;
   frames: readonly Frame[];
   pictures: readonly string[];
@@ -77,6 +111,7 @@ export function buildTestScan(input: {
     expected: expectedColors(input.scramble),
     light: input.light,
     camera: input.camera,
+    capture: input.capture,
     device: input.device,
     frameSize: input.frames[0].size,
     faces: input.frames.map((frame, i) => ({

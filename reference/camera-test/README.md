@@ -11,18 +11,25 @@ results get published.
    then press **Scan with camera**.
 2. Start from a **solved** cube. Hold it with white on top and green facing you, and do the
    moves the screen shows (a 15-move scramble).
+   - The scramble stays until you press **New scramble** (decision #70). If your cube already
+     has it from your last scan, skip this step.
 3. Pick the light: daylight, lamp, dim or other.
-4. Scan the 6 faces as the screen guides you.
-5. Press **Save test scan**.
-   - **iPhone:** the share sheet opens. Choose Save to Files or Mail, and get the file to the PC.
+4. Press **Start the camera**. For each face the screen asks for, line it up in the grid and
+   press **📷 Take this face**. In test mode the camera never takes a face by itself
+   (decision #69). Watch the small map below the video: each face fills in once it's taken.
+5. Press **Download test scan**, or **Share test scan…** on a phone.
+   - **iPhone:** Download usually lands in Files › Downloads; Share opens the share sheet (Save
+     to Files or Mail). Get the file to the PC.
    - **Computer:** the file downloads.
 6. Put the file in `batch-a/` or `batch-b/` here.
+7. To scan again: **Scan again, same scramble** (no re-scrambling) or **Scan again, new
+   scramble**.
 
 **Save every scan, good or bad.** Dropping the bad ones would flatter the result.
 
 ## What's in a batch (decision #65)
 
-8 scans, each from a new scramble:
+8 scans. Since decision #70, scans under the same camera and light may share a scramble:
 
 | Camera | Daylight | Lamp | Dim |
 |---|---|---|---|

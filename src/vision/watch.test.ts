@@ -5,7 +5,15 @@ import { randomScramble } from '../cube/scramble';
 import { seededRandom } from '../test-utils/random';
 import { cameraViews, readingsOf } from '../test-utils/scans';
 import { labDistance, type Lab } from './color';
-import { earlierFaceLike, isSteady, isTooDark, SAME_CENTER, type LiveReading } from './watch';
+import {
+  earlierFaceLike,
+  isSteady,
+  isTooDark,
+  MANUAL_MAX_WAIT_MS,
+  readyToTake,
+  SAME_CENTER,
+  type LiveReading,
+} from './watch';
 
 const face = (L: number): Lab[] => Array.from({ length: 9 }, () => ({ L, a: 10, b: 20 }));
 
@@ -31,6 +39,56 @@ describe('isSteady', () => {
 
   it('nothing seen yet is not steady', () => {
     expect(isSteady([])).toBe(false);
+  });
+});
+
+describe('readyToTake', () => {
+  // Steady readings from 0 to 1518 ms; the newest is the time asked about.
+  const history = still(1500);
+  const time = history[history.length - 1].time;
+  const base = { time, history, dark: false, repeat: false };
+
+  it('normal scan: takes a steady, bright, new face by itself', () => {
+    expect(readyToTake({ ...base, manual: false, pressedAt: null })).toBe(true);
+    expect(readyToTake({ ...base, manual: false, pressedAt: null, dark: true })).toBe(false);
+    expect(readyToTake({ ...base, manual: false, pressedAt: null, repeat: true })).toBe(false);
+  });
+
+  it('normal scan: "Take it now" takes it straight away, even dark or a repeat', () => {
+    const shaky = still(100); // not steady yet
+    const now = { manual: false, time: 132, history: shaky, dark: true, repeat: true };
+    expect(readyToTake({ ...now, pressedAt: null })).toBe(false);
+    expect(readyToTake({ ...now, pressedAt: 50 })).toBe(true);
+  });
+
+  it('test mode: never takes a face until the button is pressed', () => {
+    expect(readyToTake({ ...base, manual: true, pressedAt: null })).toBe(false);
+  });
+
+  it('test mode: after the press, waits 700 ms of stillness counted from the press', () => {
+    // Steady the whole time, but only 594 ms of it come after a press at 924 ms.
+    expect(readyToTake({ ...base, manual: true, pressedAt: 924 })).toBe(false);
+    // A press at 792 ms leaves 726 ms of steady readings after it.
+    expect(readyToTake({ ...base, manual: true, pressedAt: 792 })).toBe(true);
+  });
+
+  it('test mode: after the press, takes a dark face or a repeat too', () => {
+    const now = { ...base, manual: true, pressedAt: 0, dark: true, repeat: true };
+    expect(readyToTake(now)).toBe(true);
+  });
+
+  it('test mode: a picture that never holds still is taken once the wait runs out', () => {
+    // Every reading differs from the one before, so it is never steady.
+    const moving: LiveReading[] = Array.from({ length: 60 }, (_, i) => ({
+      time: i * 66,
+      readings: face(40 + (i % 2) * 20),
+    }));
+    const at = (t: number) => moving.filter((h) => h.time <= t);
+    const now = { manual: true, pressedAt: 0, dark: false, repeat: false };
+    const lastBefore = Math.floor((MANUAL_MAX_WAIT_MS - 1) / 66) * 66; // the last reading before the limit
+    const firstAfter = Math.ceil(MANUAL_MAX_WAIT_MS / 66) * 66; // the first at or past it
+    expect(readyToTake({ ...now, time: lastBefore, history: at(lastBefore) })).toBe(false);
+    expect(readyToTake({ ...now, time: firstAfter, history: at(firstAfter) })).toBe(true);
   });
 });
 
