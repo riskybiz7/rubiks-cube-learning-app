@@ -11,9 +11,15 @@ where we left off. Written 2026-10-09, right after PR #7 was merged.
   - add `?scan` to the address to see it;
   - add `?scan=test` for test mode.
   - Everyone else sees the app without it.
-- Merged so far: PRs #1–#7. **276 tests pass.** No scanner accuracy figures exist yet: they come
-  from your test scans below.
-- The ④c work happens on branch `phase-4c-tune`, which holds this file.
+- Merged so far: PRs #1–#7. No scanner accuracy figures exist yet: they come from your test
+  scans below.
+- The ④c work happens on branch `phase-4c-tune`, which holds this file. **285 tests pass** on it.
+- **Update, 2026-10-09 evening:** the first two PC-webcam scans showed auto-capture taking the
+  wrong faces (`reference/camera-test/batch-a/notes.md`). So, on this branch only for now:
+  - test mode takes a face only when you press **📷 Take this face** (decision #69);
+  - the scramble stays until you press **New scramble** (decision #70).
+  The live site gets these once this branch is merged. Until then, test on the PC with
+  `npm run dev` (http://localhost:5190/?scan=test).
 
 ## Your next steps
 
@@ -46,10 +52,13 @@ where we left off. Written 2026-10-09, right after PR #7 was merged.
 
 The full instructions are in `reference/camera-test/README.md`. In short:
 
-1. For **each** scan, start from a **solved** cube held white on top, green facing you.
+1. Start from a **solved** cube held white on top, green facing you.
 2. Do the 15 moves the screen shows, exactly as written. Some scrambles turn the same layer
    twice with the opposite face in between (like `U D' U2`). That's valid; just do it as written.
-3. Pick the light you're really in, then scan the 6 faces.
+   The scramble stays until you press **New scramble**, so a repeat scan in the same conditions
+   needs no re-scrambling.
+3. Pick the light you're really in, press **Start the camera**, then press **📷 Take this face**
+   for each of the 6 faces.
 4. **Save every scan, good or bad.** Leaving out bad ones would flatter the result.
 
 | Camera | Daylight | Lamp | Dim |
@@ -101,7 +110,7 @@ These help the tuning in ④c. Plain notes are fine.
 | Command | What it does |
 |---|---|
 | `npm run dev` | The app at http://localhost:5190 |
-| `npm test` | All tests (276 expected to pass) |
+| `npm test` | All tests (285 expected to pass) |
 | `$env:VITE_MEASURE = '1'; npx vitest run src/vision/measure.test.ts --silent=false` | Scanner accuracy on the saved test scans |
 
 ## Still open from earlier phases (no rush)
